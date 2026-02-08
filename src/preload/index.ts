@@ -1,0 +1,34 @@
+import { contextBridge, ipcRenderer } from 'electron'
+import { electronAPI } from '@electron-toolkit/preload'
+
+if (process.contextIsolated) {
+    try {
+        contextBridge.exposeInMainWorld('electron', electronAPI)
+        contextBridge.exposeInMainWorld('api', {
+            scheduleTweet: (tweet: any) => ipcRenderer.invoke('schedule-tweet', tweet),
+            saveDraft: (tweet: any) => ipcRenderer.invoke('save-draft', tweet),
+            getPendingTweets: () => ipcRenderer.invoke('get-pending-tweets'),
+            getDrafts: () => ipcRenderer.invoke('get-drafts'),
+            getHistory: (limit: number) => ipcRenderer.invoke('get-history', limit),
+            updateTweet: (id: number, tweet: any) => ipcRenderer.invoke('update-tweet', id, tweet),
+            deleteTweet: (id: number) => ipcRenderer.invoke('delete-tweet', id),
+            handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path)
+        })
+    } catch (error) {
+        console.error(error)
+    }
+} else {
+    // @ts-ignore (define in dts)
+    window.electron = electronAPI
+    // @ts-ignore
+    window.api = {
+        scheduleTweet: (tweet: any) => ipcRenderer.invoke('schedule-tweet', tweet),
+        saveDraft: (tweet: any) => ipcRenderer.invoke('save-draft', tweet),
+        getPendingTweets: () => ipcRenderer.invoke('get-pending-tweets'),
+        getDrafts: () => ipcRenderer.invoke('get-drafts'),
+        getHistory: (limit: number) => ipcRenderer.invoke('get-history', limit),
+        updateTweet: (id: number, tweet: any) => ipcRenderer.invoke('update-tweet', id, tweet),
+        deleteTweet: (id: number) => ipcRenderer.invoke('delete-tweet', id),
+        handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path)
+    }
+}

@@ -196,7 +196,7 @@ const App: React.FC = () => {
 
     const handleEdit = (tweet: Tweet) => {
         setBlocks([{ content: tweet.content, mediaPath: null }])
-        setScheduledAt(new Date(tweet.scheduled_at).toISOString().slice(0, 16))
+        setScheduledAt(toLocalISOString(new Date(tweet.scheduled_at)))
         setSelectedAccountId(tweet.account_id)
         setActiveIndex(0)
     }
@@ -267,9 +267,15 @@ const App: React.FC = () => {
         setTextToSplit('')
     }
 
+    const toLocalISOString = (date: Date) => {
+        const offset = date.getTimezoneOffset()
+        const localDate = new Date(date.getTime() - (offset * 60 * 1000))
+        return localDate.toISOString().slice(0, 16)
+    }
+
     const setQuickTime = (minutes: number) => {
         const date = new Date(Date.now() + minutes * 60000)
-        setScheduledAt(date.toISOString().slice(0, 16))
+        setScheduledAt(toLocalISOString(date))
     }
 
     return (
@@ -282,11 +288,11 @@ const App: React.FC = () => {
                         <select
                             value={selectedAccountId}
                             onChange={(e) => setSelectedAccountId(Number(e.target.value))}
-                            style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--card-bg)', color: 'var(--text)' }}
+                            style={{ width: '100%', padding: '0.5rem', borderRadius: '8px' }}
                         >
-                            <option value="" disabled>Select Account</option>
+                            <option value="" disabled style={{ background: 'var(--bg-secondary)', color: 'var(--text-secondary)' }}>Select Account</option>
                             {accounts.map(acc => (
-                                <option key={acc.id} value={acc.id}>{acc.name}</option>
+                                <option key={acc.id} value={acc.id} style={{ background: 'var(--bg-secondary)', color: 'var(--text)' }}>{acc.name}</option>
                             ))}
                         </select>
                     </div>

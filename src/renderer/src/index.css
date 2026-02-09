@@ -7,6 +7,19 @@
   --text-secondary: #8899a6;
   --border: #38444d;
   --error: #e0245e;
+  --card-bg: #192734;
+}
+
+select {
+  background-color: var(--card-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+option {
+  background-color: var(--bg-secondary);
+  color: var(--text);
 }
 
 body {

@@ -1,6 +1,5 @@
 import { TwitterApi } from 'twitter-api-v2'
 import * as dotenv from 'dotenv'
-import * as path from 'path'
 
 dotenv.config()
 

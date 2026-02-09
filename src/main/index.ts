@@ -1,10 +1,9 @@
 import { app, shell, BrowserWindow, ipcMain, Tray, Menu, nativeImage } from 'electron'
-import { join } from 'path'
+import { join, basename } from 'path'
 import { optimizer, is } from '@electron-toolkit/utils'
 import { DatabaseService } from './services/database'
 import { Processor } from './logic/processor'
 import fs from 'fs-extra'
-import path from 'path'
 
 const isDev = !app.isPackaged
 
@@ -24,13 +23,15 @@ setInterval(() => {
 
 function createTray(): void {
     const iconPath = isDev
-        ? join(__dirname, '../../resources/icon.png')
+        ? join(app.getAppPath(), 'resources/icon.png')
         : join(process.resourcesPath, 'icon.png')
 
     // Create icon from file, ensuring it exists
     let icon;
     if (fs.existsSync(iconPath)) {
-        icon = nativeImage.createFromPath(iconPath).resize({ width: 16, height: 16 })
+        icon = nativeImage.createFromPath(iconPath)
+        // On Windows, 32x32 is better for high DPI
+        icon = icon.resize({ width: 32, height: 32 })
     } else {
         icon = nativeImage.createEmpty()
     }
@@ -147,7 +148,7 @@ app.whenReady().then(() => {
     ipcMain.handle('handle-media-upload', async (_, filePath: string) => {
         const mediaDir = join(app.getPath('userData'), 'media')
         await fs.ensureDir(mediaDir)
-        const fileName = `${Date.now()}-${path.basename(filePath)}`
+        const fileName = `${Date.now()}-${basename(filePath)}`
         const destPath = join(mediaDir, fileName)
         await fs.copy(filePath, destPath)
         return destPath

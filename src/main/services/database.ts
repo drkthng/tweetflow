@@ -2,6 +2,15 @@ import Database from 'better-sqlite3'
 import path from 'path'
 import fs from 'fs-extra'
 
+export interface AccountRecord {
+    id?: number
+    name: string
+    app_key: string
+    app_secret: string
+    access_token: string
+    access_secret: string
+}
+
 export interface TweetRecord {
     id?: number
     content: string
@@ -12,17 +21,34 @@ export interface TweetRecord {
     sequence_index: number
     parent_id: string | null
     tweet_id?: string | null
+    account_id: number
+    error_message?: string | null
 }
 
 export class DatabaseService {
     private db: Database.Database
 
     constructor(dbPath: string) {
-        fs.ensureDirSync(path.dirname(dbPath))
+        if (dbPath !== ':memory:') {
+            fs.ensureDirSync(path.dirname(dbPath))
+        }
         this.db = new Database(dbPath)
     }
 
     init() {
+        // Create accounts table
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS accounts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                app_key TEXT NOT NULL,
+                app_secret TEXT NOT NULL,
+                access_token TEXT NOT NULL,
+                access_secret TEXT NOT NULL
+            )
+        `)
+
+        // Create tweets table
         this.db.exec(`
       CREATE TABLE IF NOT EXISTS tweets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -33,15 +59,66 @@ export class DatabaseService {
         thread_id TEXT,
         sequence_index INTEGER DEFAULT 0,
         parent_id TEXT,
-        tweet_id TEXT
+        tweet_id TEXT,
+        account_id INTEGER,
+        error_message TEXT,
+        FOREIGN KEY (account_id) REFERENCES accounts(id)
       )
     `)
+
+        // Migrate existing schema if necessary (adding account_id if it doesn't exist)
+        const tableInfo = this.getTableInfo('tweets') as any[]
+        const hasAccountId = tableInfo.some((col: any) => col.name === 'account_id')
+        if (!hasAccountId) {
+            this.db.exec('ALTER TABLE tweets ADD COLUMN account_id INTEGER')
+        }
+
+        const hasErrorMessage = tableInfo.some((col: any) => col.name === 'error_message')
+        if (!hasErrorMessage) {
+            this.db.exec('ALTER TABLE tweets ADD COLUMN error_message TEXT')
+        }
     }
 
+    // Account Methods
+    getAccounts(): AccountRecord[] {
+        return this.db.prepare('SELECT * FROM accounts').all() as AccountRecord[]
+    }
+
+    getAccountById(id: number): AccountRecord {
+        return this.db.prepare('SELECT * FROM accounts WHERE id = ?').get(id) as AccountRecord
+    }
+
+    createAccount(account: AccountRecord): number {
+        const stmt = this.db.prepare(`
+            INSERT INTO accounts (name, app_key, app_secret, access_token, access_secret)
+            VALUES (?, ?, ?, ?, ?)
+        `)
+        const result = stmt.run(
+            account.name,
+            account.app_key,
+            account.app_secret,
+            account.access_token,
+            account.access_secret
+        )
+        return result.lastInsertRowid as number
+    }
+
+    updateAccount(id: number, account: Partial<AccountRecord>) {
+        const fields = Object.keys(account).map(k => `${k} = ?`).join(', ')
+        const values = Object.values(account)
+        const stmt = this.db.prepare(`UPDATE accounts SET ${fields} WHERE id = ?`)
+        stmt.run(...values, id)
+    }
+
+    deleteAccount(id: number) {
+        this.db.prepare('DELETE FROM accounts WHERE id = ?').run(id)
+    }
+
+    // Tweet Methods
     createTweet(tweet: TweetRecord): number {
         const stmt = this.db.prepare(`
-      INSERT INTO tweets (content, status, scheduled_at, media_path, thread_id, sequence_index, parent_id)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO tweets (content, status, scheduled_at, media_path, thread_id, sequence_index, parent_id, account_id)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `)
         const result = stmt.run(
             tweet.content,
@@ -50,7 +127,8 @@ export class DatabaseService {
             tweet.media_path,
             tweet.thread_id,
             tweet.sequence_index,
-            tweet.parent_id
+            tweet.parent_id,
+            tweet.account_id
         )
         return result.lastInsertRowid as number
     }
@@ -60,9 +138,9 @@ export class DatabaseService {
         return stmt.get(id) as TweetRecord
     }
 
-    updateTweetStatus(id: number, status: string, tweetId?: string) {
-        const stmt = this.db.prepare('UPDATE tweets SET status = ?, tweet_id = ? WHERE id = ?')
-        stmt.run(status, tweetId || null, id)
+    updateTweetStatus(id: number, status: string, tweetId?: string, errorMessage?: string) {
+        const stmt = this.db.prepare('UPDATE tweets SET status = ?, tweet_id = ?, error_message = ? WHERE id = ?')
+        stmt.run(status, tweetId || null, errorMessage || null, id)
     }
 
     getPendingTweets(now: number): TweetRecord[] {

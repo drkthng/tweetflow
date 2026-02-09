@@ -3,33 +3,17 @@ import { join } from 'path'
 import { optimizer, is } from '@electron-toolkit/utils'
 import { DatabaseService } from './services/database'
 import { Processor } from './logic/processor'
-import { TwitterApi } from 'twitter-api-v2'
-import * as dotenv from 'dotenv'
 import fs from 'fs-extra'
 import path from 'path'
 
 const isDev = !app.isPackaged
 
-if (isDev) {
-    dotenv.config()
-} else {
-    // In production, look for .env next to the executable
-    dotenv.config({ path: join(process.resourcesPath, '.env') })
-    dotenv.config({ path: join(path.dirname(process.execPath), '.env') })
-}
-
+// Database and Processor Initialization
 const dbPath = join(app.getPath('userData'), 'tweets.db')
 const db = new DatabaseService(dbPath)
 db.init()
 
-const twitterClient = new TwitterApi({
-    appKey: process.env.TWITTER_APP_KEY || '',
-    appSecret: process.env.TWITTER_APP_SECRET || '',
-    accessToken: process.env.TWITTER_ACCESS_TOKEN || '',
-    accessSecret: process.env.TWITTER_ACCESS_SECRET || ''
-})
-
-const processor = new Processor(db, twitterClient)
+const processor = new Processor(db)
 let tray: Tray | null = null
 let mainWindow: BrowserWindow | null = null
 
@@ -108,7 +92,24 @@ app.whenReady().then(() => {
         optimizer.watchWindowShortcuts(window)
     })
 
-    // IPC Handlers
+    // IPC Handlers - Accounts
+    ipcMain.handle('get-accounts', () => {
+        return db.getAccounts()
+    })
+
+    ipcMain.handle('add-account', (_, accountData) => {
+        return db.createAccount(accountData)
+    })
+
+    ipcMain.handle('update-account', (_, id, accountData) => {
+        return db.updateAccount(id, accountData)
+    })
+
+    ipcMain.handle('delete-account', (_, id) => {
+        return db.deleteAccount(id)
+    })
+
+    // IPC Handlers - Tweets
     ipcMain.handle('get-pending-tweets', () => {
         return db.getPendingTweets(Date.now() + 1000 * 60 * 60 * 24 * 365) // Get all pending
     })

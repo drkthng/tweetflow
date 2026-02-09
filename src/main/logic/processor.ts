@@ -4,11 +4,31 @@ import { DatabaseService, TweetRecord } from '../services/database'
 
 export class Processor {
     private db: DatabaseService
-    private twitter: TwitterApi
+    private clients: Map<number, TwitterApi> = new Map()
 
-    constructor(db: DatabaseService, twitter: TwitterApi) {
+    constructor(db: DatabaseService) {
         this.db = db
-        this.twitter = twitter
+    }
+
+    private getTwitterClient(accountId: number): TwitterApi {
+        if (this.clients.has(accountId)) {
+            return this.clients.get(accountId)!
+        }
+
+        const account = this.db.getAccountById(accountId)
+        if (!account) {
+            throw new Error(`Account not found: ${accountId}`)
+        }
+
+        const client = new TwitterApi({
+            appKey: account.app_key,
+            appSecret: account.app_secret,
+            accessToken: account.access_token,
+            accessSecret: account.access_secret
+        })
+
+        this.clients.set(accountId, client)
+        return client
     }
 
     async processQueue(): Promise<void> {
@@ -18,22 +38,35 @@ export class Processor {
         for (const tweet of pendingTweets) {
             try {
                 await this.sendTweet(tweet)
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Failed to send tweet:', error)
                 if (tweet.id) {
-                    this.db.updateTweetStatus(tweet.id, 'failed')
+                    let message = 'Unknown error'
+                    if (error.data) {
+                        if (error.data.detail) {
+                            message = error.data.detail
+                        } else if (error.data.errors && Array.isArray(error.data.errors) && error.data.errors.length > 0) {
+                            message = error.data.errors[0].message
+                        } else if (typeof error.data === 'string') {
+                            message = error.data
+                        }
+                    } else {
+                        message = error.message || 'Unknown error'
+                    }
+                    this.db.updateTweetStatus(tweet.id, 'failed', undefined, message)
                 }
             }
         }
     }
 
     private async sendTweet(tweet: TweetRecord): Promise<void> {
+        const twitter = this.getTwitterClient(tweet.account_id)
         const options: any = {}
 
         // 1. Handle Media
         if (tweet.media_path && fs.existsSync(tweet.media_path)) {
             const mediaData = await fs.readFile(tweet.media_path)
-            const mediaId = await this.twitter.v1.uploadMedia(mediaData, { mimeType: 'image/jpeg' })
+            const mediaId = await twitter.v1.uploadMedia(mediaData, { mimeType: 'image/jpeg' })
             options.media = { media_ids: [mediaId] }
         }
 
@@ -46,7 +79,7 @@ export class Processor {
         }
 
         // 3. Post to Twitter
-        const response = await this.twitter.v2.tweet({
+        const response = await twitter.v2.tweet({
             text: tweet.content,
             ...options
         })

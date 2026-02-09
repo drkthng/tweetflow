@@ -12,7 +12,12 @@ if (process.contextIsolated) {
             getHistory: (limit: number) => ipcRenderer.invoke('get-history', limit),
             updateTweet: (id: number, tweet: any) => ipcRenderer.invoke('update-tweet', id, tweet),
             deleteTweet: (id: number) => ipcRenderer.invoke('delete-tweet', id),
-            handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path)
+            handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path),
+            // Account Management
+            getAccounts: () => ipcRenderer.invoke('get-accounts'),
+            addAccount: (account: any) => ipcRenderer.invoke('add-account', account),
+            updateAccount: (id: number, account: any) => ipcRenderer.invoke('update-account', id, account),
+            deleteAccount: (id: number) => ipcRenderer.invoke('delete-account', id)
         })
     } catch (error) {
         console.error(error)
@@ -29,6 +34,11 @@ if (process.contextIsolated) {
         getHistory: (limit: number) => ipcRenderer.invoke('get-history', limit),
         updateTweet: (id: number, tweet: any) => ipcRenderer.invoke('update-tweet', id, tweet),
         deleteTweet: (id: number) => ipcRenderer.invoke('delete-tweet', id),
-        handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path)
+        handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path),
+        // Account Management
+        getAccounts: () => ipcRenderer.invoke('get-accounts'),
+        addAccount: (account: any) => ipcRenderer.invoke('add-account', account),
+        updateAccount: (id: number, account: any) => ipcRenderer.invoke('update-account', id, account),
+        deleteAccount: (id: number) => ipcRenderer.invoke('delete-account', id)
     }
 }

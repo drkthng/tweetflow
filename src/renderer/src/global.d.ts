@@ -11,6 +11,11 @@ declare global {
             updateTweet: (id: number, tweet: any) => Promise<void>;
             deleteTweet: (id: number) => Promise<void>;
             handleMediaUpload: (path: string) => Promise<string>;
+            // Account Management
+            getAccounts: () => Promise<any[]>;
+            addAccount: (account: any) => Promise<number>;
+            updateAccount: (id: number, account: any) => Promise<void>;
+            deleteAccount: (id: number) => Promise<void>;
         };
     }
 }

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Processor } from '../processor'
-import { DatabaseService, TweetRecord } from '../../services/database'
+import { TweetRecord } from '../../services/database'
 import { TwitterApi } from 'twitter-api-v2'
 import fs from 'fs-extra'
 
@@ -22,7 +22,8 @@ describe('Processor', () => {
         mockDb = {
             getPendingTweets: vi.fn(),
             updateTweetStatus: vi.fn(),
-            getTweetById: vi.fn()
+            getTweetById: vi.fn(),
+            getAccountById: vi.fn()
         }
 
         mockV1Client = {
@@ -38,10 +39,20 @@ describe('Processor', () => {
             v2: mockV2Client
         }
 
-        processor = new Processor(mockDb as any, mockTwitter as any)
+        // Mock TwitterApi constructor logic or getTwitterClient dynamic return
+        vi.mocked(TwitterApi).mockImplementation(() => mockTwitter)
+
+        processor = new Processor(mockDb as any)
     })
 
-    it('should process a single tweet without media', async () => {
+    it('should process a single tweet without media using correct account', async () => {
+        const account = {
+            id: 1,
+            app_key: 'key',
+            app_secret: 'secret',
+            access_token: 'token',
+            access_secret: 'secret'
+        }
         const tweet: TweetRecord = {
             id: 1,
             content: 'Hello Twitter',
@@ -50,13 +61,16 @@ describe('Processor', () => {
             media_path: null,
             thread_id: null,
             sequence_index: 0,
-            parent_id: null
+            parent_id: null,
+            account_id: 1
         }
 
         mockDb.getPendingTweets.mockReturnValue([tweet])
+        mockDb.getAccountById.mockReturnValue(account)
 
         await processor.processQueue()
 
+        expect(mockDb.getAccountById).toHaveBeenCalledWith(1)
         expect(mockV2Client.tweet).toHaveBeenCalledWith({ text: 'Hello Twitter' })
         expect(mockDb.updateTweetStatus).toHaveBeenCalledWith(1, 'sent', 'tweet_id_456')
     })
@@ -70,10 +84,12 @@ describe('Processor', () => {
             media_path: 'path/to/image.jpg',
             thread_id: null,
             sequence_index: 0,
-            parent_id: null
+            parent_id: null,
+            account_id: 1
         }
 
         mockDb.getPendingTweets.mockReturnValue([tweet])
+        mockDb.getAccountById.mockReturnValue({ id: 1, app_key: 'k', app_secret: 's', access_token: 't', access_secret: 'as' })
             ; (fs.existsSync as any).mockReturnValue(true)
             ; (fs.readFile as any).mockResolvedValue(Buffer.from('dummy-data'))
 
@@ -96,7 +112,8 @@ describe('Processor', () => {
             media_path: null,
             thread_id: 'thread_1',
             sequence_index: 0,
-            parent_id: null
+            parent_id: null,
+            account_id: 1
         }
 
         const tweet2: TweetRecord = {
@@ -107,10 +124,12 @@ describe('Processor', () => {
             media_path: null,
             thread_id: 'thread_1',
             sequence_index: 1,
-            parent_id: '10' // In the DB we store the local ID of the parent tweet
+            parent_id: '10', // In the DB we store the local ID of the parent tweet
+            account_id: 1
         }
 
         mockDb.getPendingTweets.mockReturnValueOnce([tweet1]).mockReturnValueOnce([tweet2])
+        mockDb.getAccountById.mockReturnValue({ id: 1, app_key: 'k', app_secret: 's', access_token: 't', access_secret: 'as' })
         // Mock getTweetById to return the actual Twitter ID for the reply
         mockDb.getTweetById.mockReturnValue({ tweet_id: 'tweet_id_10' })
 
@@ -135,10 +154,12 @@ describe('Processor', () => {
             media_path: null,
             thread_id: null,
             sequence_index: 0,
-            parent_id: null
+            parent_id: null,
+            account_id: 1
         }
 
         mockDb.getPendingTweets.mockReturnValue([tweet])
+        mockDb.getAccountById.mockReturnValue({ id: 1, app_key: 'k', app_secret: 's', access_token: 't', access_secret: 'as' })
         mockV2Client.tweet.mockRejectedValue(new Error('API Error'))
 
         await processor.processQueue()

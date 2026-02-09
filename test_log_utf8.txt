@@ -1,0 +1,178 @@
+[33mThe CJS build of Vite's Node API is deprecated. See https://vite.dev/guide/troubleshooting.html#vite-cjs-node-api-deprecated for more details.[39m
+
+[7m[1m[36m RUN [39m[22m[27m [36mv1.6.1[39m [90mD:/Antigravity/TweetFlow-Scheduler[39m
+
+[90mstdout[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould create the tweets and accounts tables with correct columns[22m[39m
+Starting beforeEach...
+
+[90mstderr[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould create the tweets and accounts tables with correct columns[22m[39m
+Error in beforeEach: Error: The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+[90m    at Object..node (node:internal/modules/cjs/loader:1920:18)[39m
+[90m    at Module.load (node:internal/modules/cjs/loader:1481:32)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1300:12)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.require (node:internal/modules/cjs/loader:1504:12)[39m
+[90m    at require (node:internal/modules/helpers:152:16)[39m
+    at bindings [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbindings[24m\bindings.js:112:48[90m)[39m
+    at new Database [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbetter-sqlite3[24m\lib\database.js:48:64[90m)[39m
+    at new DatabaseService [90m(D:\Antigravity\TweetFlow-Scheduler\[39msrc\main\services\database.ts:34:19[90m)[39m {
+  code: [32m'ERR_DLOPEN_FAILED'[39m
+}
+
+[90mstdout[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould create and retrieve an account[22m[39m
+Starting beforeEach...
+
+[90mstderr[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould create and retrieve an account[22m[39m
+Error in beforeEach: Error: The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+[90m    at Object..node (node:internal/modules/cjs/loader:1920:18)[39m
+[90m    at Module.load (node:internal/modules/cjs/loader:1481:32)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1300:12)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.require (node:internal/modules/cjs/loader:1504:12)[39m
+[90m    at require (node:internal/modules/helpers:152:16)[39m
+    at bindings [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbindings[24m\bindings.js:112:48[90m)[39m
+    at new Database [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbetter-sqlite3[24m\lib\database.js:48:64[90m)[39m
+    at new DatabaseService [90m(D:\Antigravity\TweetFlow-Scheduler\[39msrc\main\services\database.ts:34:19[90m)[39m {
+  code: [32m'ERR_DLOPEN_FAILED'[39m
+}
+
+[90mstdout[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould insert and retrieve a tweet with account_id[22m[39m
+Starting beforeEach...
+
+[90mstderr[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould insert and retrieve a tweet with account_id[22m[39m
+Error in beforeEach: Error: The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+[90m    at Object..node (node:internal/modules/cjs/loader:1920:18)[39m
+[90m    at Module.load (node:internal/modules/cjs/loader:1481:32)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1300:12)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.require (node:internal/modules/cjs/loader:1504:12)[39m
+[90m    at require (node:internal/modules/helpers:152:16)[39m
+    at bindings [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbindings[24m\bindings.js:112:48[90m)[39m
+    at new Database [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbetter-sqlite3[24m\lib\database.js:48:64[90m)[39m
+    at new DatabaseService [90m(D:\Antigravity\TweetFlow-Scheduler\[39msrc\main\services\database.ts:34:19[90m)[39m {
+  code: [32m'ERR_DLOPEN_FAILED'[39m
+}
+
+[90mstdout[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould update tweet status and tweet_id[22m[39m
+Starting beforeEach...
+
+[90mstderr[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould update tweet status and tweet_id[22m[39m
+Error in beforeEach: Error: The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+[90m    at Object..node (node:internal/modules/cjs/loader:1920:18)[39m
+[90m    at Module.load (node:internal/modules/cjs/loader:1481:32)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1300:12)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.require (node:internal/modules/cjs/loader:1504:12)[39m
+[90m    at require (node:internal/modules/helpers:152:16)[39m
+    at bindings [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbindings[24m\bindings.js:112:48[90m)[39m
+    at new Database [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbetter-sqlite3[24m\lib\database.js:48:64[90m)[39m
+    at new DatabaseService [90m(D:\Antigravity\TweetFlow-Scheduler\[39msrc\main\services\database.ts:34:19[90m)[39m {
+  code: [32m'ERR_DLOPEN_FAILED'[39m
+}
+
+[90mstdout[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould retrieve pending tweets[22m[39m
+Starting beforeEach...
+
+[90mstderr[2m | src/main/services/__tests__/database.test.ts[2m > [22m[2mDatabaseService[2m > [22m[2mshould retrieve pending tweets[22m[39m
+Error in beforeEach: Error: The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).
+[90m    at Object..node (node:internal/modules/cjs/loader:1920:18)[39m
+[90m    at Module.load (node:internal/modules/cjs/loader:1481:32)[39m
+[90m    at Module._load (node:internal/modules/cjs/loader:1300:12)[39m
+[90m    at TracingChannel.traceSync (node:diagnostics_channel:328:14)[39m
+[90m    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)[39m
+[90m    at Module.require (node:internal/modules/cjs/loader:1504:12)[39m
+[90m    at require (node:internal/modules/helpers:152:16)[39m
+    at bindings [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbindings[24m\bindings.js:112:48[90m)[39m
+    at new Database [90m(D:\Antigravity\TweetFlow-Scheduler\[39mnode_modules\[4mbetter-sqlite3[24m\lib\database.js:48:64[90m)[39m
+    at new DatabaseService [90m(D:\Antigravity\TweetFlow-Scheduler\[39msrc\main\services\database.ts:34:19[90m)[39m {
+  code: [32m'ERR_DLOPEN_FAILED'[39m
+}
+
+ [33m❯[39m src/main/services/__tests__/database.test.ts [2m ([22m[2m5 tests[22m [2m|[22m [31m5 failed[39m[2m)[22m[90m 55[2mms[22m[39m
+[31m   [33m❯[31m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould create the tweets and accounts tables with correct columns[39m
+[31m     → The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).[39m
+[31m   [33m❯[31m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould create and retrieve an account[39m
+[31m     → The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).[39m
+[31m   [33m❯[31m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould insert and retrieve a tweet with account_id[39m
+[31m     → The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).[39m
+[31m   [33m❯[31m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould update tweet status and tweet_id[39m
+[31m     → The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).[39m
+[31m   [33m❯[31m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould retrieve pending tweets[39m
+[31m     → The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[1m[7m Failed Tests 5 [27m[22m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[31m[1m[7m FAIL [27m[22m[39m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould create the tweets and accounts tables with correct columns
+[31m[1m[7m FAIL [27m[22m[39m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould create and retrieve an account
+[31m[1m[7m FAIL [27m[22m[39m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould insert and retrieve a tweet with account_id
+[31m[1m[7m FAIL [27m[22m[39m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould update tweet status and tweet_id
+[31m[1m[7m FAIL [27m[22m[39m src/main/services/__tests__/database.test.ts[2m > [22mDatabaseService[2m > [22mshould retrieve pending tweets
+[31m[1mError[22m: The module '\\?\D:\Antigravity\TweetFlow-Scheduler\node_modules\better-sqlite3\build\Release\better_sqlite3.node'
+was compiled against a different Node.js version using
+NODE_MODULE_VERSION 125. This version of Node.js requires
+NODE_MODULE_VERSION 137. Please try re-compiling or re-installing
+the module (for instance, using `npm rebuild` or `npm install`).[39m
+[90m [2m❯[22m TracingChannel.traceSync node:diagnostics_channel:[2m328:14[22m[39m
+[90m [2m❯[22m bindings node_modules/bindings/bindings.js:[2m112:48[22m[39m
+[90m [2m❯[22m new Database node_modules/better-sqlite3/lib/database.js:[2m48:64[22m[39m
+[36m [2m❯[22m new DatabaseService src/main/services/database.ts:[2m34:19[22m[39m
+    [90m 32| [39m            fs[33m.[39m[34mensureDirSync[39m(path[33m.[39m[34mdirname[39m(dbPath))
+    [90m 33| [39m        }
+    [90m 34| [39m        [35mthis[39m[33m.[39mdb [33m=[39m [35mnew[39m [33mDatabase[39m(dbPath)
+    [90m   | [39m                  [31m^[39m
+    [90m 35| [39m    }
+    [90m 36| [39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22m[39m
+[31m[1mSerialized Error:[22m[39m [90m{ code: 'ERR_DLOPEN_FAILED' }[39m
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[31m5 failed[39m[22m[90m (5)[39m
+[2m   Start at [22m 21:37:35
+[2m   Duration [22m 1.95s[2m (transform 188ms, setup 0ms, collect 399ms, tests 55ms, environment 0ms, prepare 713ms)[22m
+

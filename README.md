@@ -63,6 +63,25 @@ To create a production-ready package:
 npm run build
 ```
 
+## 👥 Multi-Account Support
+
+Currently, TweetFlow-Scheduler supports one active account at a time via environment variables.
+
+### How to Switch Accounts
+
+To use a different Twitter account:
+1.  **Update `.env`**: Open your `.env` file and replace the existing keys with the keys from your other account:
+    ```env
+    TWITTER_APP_KEY=new_app_key
+    TWITTER_APP_SECRET=new_app_secret
+    TWITTER_ACCESS_TOKEN=new_access_token
+    TWITTER_ACCESS_SECRET=new_access_secret
+    ```
+2.  **Restart App**: Close and restart TweetFlow-Scheduler to load the new credentials.
+
+> [!NOTE]
+> The internal database is already designed to support multiple accounts natively. Full multi-account management within the UI is planned for a future update.
+
 ## 📜 Development Scripts
 
 -   `npm run dev`: Starts the application in development mode with HMR.

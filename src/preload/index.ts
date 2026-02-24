@@ -17,7 +17,11 @@ if (process.contextIsolated) {
             getAccounts: () => ipcRenderer.invoke('get-accounts'),
             addAccount: (account: any) => ipcRenderer.invoke('add-account', account),
             updateAccount: (id: number, account: any) => ipcRenderer.invoke('update-account', id, account),
-            deleteAccount: (id: number) => ipcRenderer.invoke('delete-account', id)
+            deleteAccount: (id: number) => ipcRenderer.invoke('delete-account', id),
+            // Queue Slot Management
+            getQueueSlots: () => ipcRenderer.invoke('get-queue-slots'),
+            addQueueSlot: (timeStr: string) => ipcRenderer.invoke('add-queue-slot', timeStr),
+            deleteQueueSlot: (id: number) => ipcRenderer.invoke('delete-queue-slot', id)
         })
     } catch (error) {
         console.error(error)
@@ -39,6 +43,10 @@ if (process.contextIsolated) {
         getAccounts: () => ipcRenderer.invoke('get-accounts'),
         addAccount: (account: any) => ipcRenderer.invoke('add-account', account),
         updateAccount: (id: number, account: any) => ipcRenderer.invoke('update-account', id, account),
-        deleteAccount: (id: number) => ipcRenderer.invoke('delete-account', id)
+        deleteAccount: (id: number) => ipcRenderer.invoke('delete-account', id),
+        // Queue Slot Management
+        getQueueSlots: () => ipcRenderer.invoke('get-queue-slots'),
+        addQueueSlot: (timeStr: string) => ipcRenderer.invoke('add-queue-slot', timeStr),
+        deleteQueueSlot: (id: number) => ipcRenderer.invoke('delete-queue-slot', id)
     }
 }

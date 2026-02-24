@@ -63,7 +63,7 @@ describe('DatabaseService', () => {
             access_secret: 'token_secret'
         })
 
-        const tweet = {
+        const tweet: any = {
             content: 'Hello World',
             status: 'pending' as const,
             scheduled_at: Date.now(),
@@ -71,7 +71,11 @@ describe('DatabaseService', () => {
             thread_id: null,
             sequence_index: 0,
             parent_id: null,
-            account_id: accountId
+            account_id: accountId,
+            mode: 'scheduled' as const,
+            is_recurring: false,
+            send_count: 0,
+            recurrence_interval: 15552000000
         }
 
         const id = dbService.createTweet(tweet)
@@ -94,7 +98,11 @@ describe('DatabaseService', () => {
             thread_id: null,
             sequence_index: 0,
             parent_id: null,
-            account_id: accountId
+            account_id: accountId,
+            mode: 'scheduled',
+            is_recurring: false,
+            send_count: 0,
+            recurrence_interval: 15552000000
         })
 
         dbService.updateTweetStatus(id, 'sent', '123456789')
@@ -109,9 +117,9 @@ describe('DatabaseService', () => {
             name: 'Test', app_key: 'k', app_secret: 's', access_token: 't', access_secret: 'as'
         })
         const now = Date.now()
-        dbService.createTweet({ content: 'Past', status: 'pending', scheduled_at: now - 1000, media_path: null, thread_id: null, sequence_index: 0, parent_id: null, account_id: accountId })
-        dbService.createTweet({ content: 'Future', status: 'pending', scheduled_at: now + 1000, media_path: null, thread_id: null, sequence_index: 0, parent_id: null, account_id: accountId })
-        dbService.createTweet({ content: 'Sent', status: 'sent', scheduled_at: now - 1000, media_path: null, thread_id: null, sequence_index: 0, parent_id: null, account_id: accountId })
+        dbService.createTweet({ content: 'Past', status: 'pending', scheduled_at: now - 1000, media_path: null, thread_id: null, sequence_index: 0, parent_id: null, account_id: accountId, mode: 'scheduled', is_recurring: false, send_count: 0, recurrence_interval: 15552000000 })
+        dbService.createTweet({ content: 'Future', status: 'pending', scheduled_at: now + 1000, media_path: null, thread_id: null, sequence_index: 0, parent_id: null, account_id: accountId, mode: 'scheduled', is_recurring: false, send_count: 0, recurrence_interval: 15552000000 })
+        dbService.createTweet({ content: 'Sent', status: 'sent', scheduled_at: now - 1000, media_path: null, thread_id: null, sequence_index: 0, parent_id: null, account_id: accountId, mode: 'scheduled', is_recurring: false, send_count: 0, recurrence_interval: 15552000000 })
 
         const pending = dbService.getPendingTweets(now)
         expect(pending).toHaveLength(1)

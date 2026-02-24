@@ -16,6 +16,10 @@ declare global {
             addAccount: (account: any) => Promise<number>;
             updateAccount: (id: number, account: any) => Promise<void>;
             deleteAccount: (id: number) => Promise<void>;
+            // Queue Slot Management
+            getQueueSlots: () => Promise<any[]>;
+            addQueueSlot: (timeStr: string) => Promise<number>;
+            deleteQueueSlot: (id: number) => Promise<void>;
         };
     }
 }

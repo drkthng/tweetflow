@@ -8,6 +8,12 @@ interface Tweet {
     scheduled_at: number
     thread_id?: string | null
     parent_id?: string | null
+    account_id: number
+    error_message?: string | null
+    mode: 'scheduled' | 'queued'
+    is_recurring: boolean
+    send_count: number
+    recurrence_interval: number
 }
 
 interface Account {
@@ -19,16 +25,7 @@ interface Account {
     access_secret: string
 }
 
-interface Tweet {
-    id: number
-    content: string
-    status: string
-    scheduled_at: number
-    thread_id?: string | null
-    parent_id?: string | null
-    account_id: number
-    error_message?: string | null
-}
+// Duplicate interface removed
 
 const App: React.FC = () => {
     const [blocks, setBlocks] = useState<{ content: string; mediaPath: string | null }[]>([{ content: '', mediaPath: null }])
@@ -39,10 +36,18 @@ const App: React.FC = () => {
     const [loading, setLoading] = useState(false)
     const [textToSplit, setTextToSplit] = useState('')
     const [threadDelay, setThreadDelay] = useState(20)
-    const [history, setHistory] = useState<Tweet[]>([])
+    const [history, setHistory] = useState<any[]>([]) // Using any[] for history because it now follows SendLog
     const [historyLimit] = useState(50)
-    const [activeTab, setActiveTab] = useState<'queue' | 'drafts' | 'history' | 'accounts'>('queue')
+    const [activeTab, setActiveTab] = useState<'queue' | 'drafts' | 'history' | 'accounts' | 'slots'>('queue')
     const [customSeparator, setCustomSeparator] = useState('||')
+
+    // New Composer States
+    const [tweetMode, setTweetMode] = useState<'scheduled' | 'queued'>('scheduled')
+    const [isRecurring, setIsRecurring] = useState(false)
+    const [recurrenceMonths, setRecurrenceMonths] = useState(6)
+    const [queueSlots, setQueueSlots] = useState<any[]>([])
+    const [newSlotHour, setNewSlotHour] = useState('09')
+    const [newSlotMinute, setNewSlotMinute] = useState('00')
 
     // Account States
     const [accounts, setAccounts] = useState<Account[]>([])
@@ -77,9 +82,17 @@ const App: React.FC = () => {
         }
     }
 
+    const fetchSlots = async () => {
+        if (window.api && window.api.getQueueSlots) {
+            const data = await window.api.getQueueSlots()
+            setQueueSlots(data)
+        }
+    }
+
     useEffect(() => {
         fetchTweets()
         fetchAccounts()
+        fetchSlots()
         const interval = setInterval(fetchTweets, 10000)
         return () => clearInterval(interval)
     }, [])
@@ -127,7 +140,10 @@ const App: React.FC = () => {
                     thread_id: threadId,
                     sequence_index: i,
                     parent_id: lastId,
-                    account_id: selectedAccountId
+                    account_id: selectedAccountId,
+                    mode: tweetMode,
+                    is_recurring: isRecurring ? 1 : 0,
+                    recurrence_interval: recurrenceMonths * 30 * 24 * 60 * 60 * 1000
                 })
                 lastId = newId
             }
@@ -198,7 +214,22 @@ const App: React.FC = () => {
         setBlocks([{ content: tweet.content, mediaPath: null }])
         setScheduledAt(toLocalISOString(new Date(tweet.scheduled_at)))
         setSelectedAccountId(tweet.account_id)
+        setTweetMode(tweet.mode)
+        setIsRecurring(tweet.is_recurring)
+        setRecurrenceMonths(Math.round(tweet.recurrence_interval / (30 * 24 * 60 * 60 * 1000)))
         setActiveIndex(0)
+    }
+
+    const handleAddSlot = async () => {
+        const timeStr = `${newSlotHour}:${newSlotMinute}`
+        await window.api.addQueueSlot(timeStr)
+        await fetchSlots()
+    }
+
+    const handleDeleteSlot = async (id: number) => {
+        if (!confirm('Delete this slot?')) return
+        await window.api.deleteQueueSlot(id)
+        await fetchSlots()
     }
 
     const addBlock = () => {
@@ -399,6 +430,46 @@ const App: React.FC = () => {
                             }}
                         />
                     </div>
+                </div>
+
+                <div className="card" style={{ marginTop: '1rem' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                        <div>
+                            <label style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', display: 'block', marginBottom: '0.5rem' }}>Send Mode</label>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                                    <input type="radio" name="mode" value="scheduled" checked={tweetMode === 'scheduled'} onChange={() => setTweetMode('scheduled')} />
+                                    Scheduled
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer' }}>
+                                    <input type="radio" name="mode" value="queued" checked={tweetMode === 'queued'} onChange={() => setTweetMode('queued')} />
+                                    Queued
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.9rem' }}>
+                                <input type="checkbox" checked={isRecurring} onChange={e => setIsRecurring(e.target.checked)} />
+                                Recurring Send
+                            </label>
+                            {isRecurring && (
+                                <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                    <span style={{ fontSize: '0.8rem' }}>Every</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        value={recurrenceMonths}
+                                        onChange={e => setRecurrenceMonths(parseInt(e.target.value) || 1)}
+                                        style={{ width: '50px', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)', padding: '0.2rem', borderRadius: '4px' }}
+                                    />
+                                    <span style={{ fontSize: '0.8rem' }}>months</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+
+                <div className="card" style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
                     <button onClick={() => handleAction(true)} className="btn-secondary" disabled={loading}>
                         Save Draft
                     </button>
@@ -407,7 +478,7 @@ const App: React.FC = () => {
                     </button>
                 </div>
 
-                <div className="smart-split-area">
+                <div className="card" style={{ marginTop: '1rem' }}>
                     <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>Smart Text Splitter</h3>
                     <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', alignItems: 'center' }}>
                         <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Separator:</span>
@@ -438,14 +509,14 @@ const App: React.FC = () => {
 
             <div className="card">
                 <div className="tabs">
-                    {['queue', 'drafts', 'history', 'accounts'].map((t) => (
+                    {['queue', 'drafts', 'history', 'accounts', 'slots'].map((t) => (
                         <div
                             key={t}
                             className={`tab ${activeTab === t ? 'active' : ''}`}
                             onClick={() => setActiveTab(t as any)}
                         >
-                            {t.charAt(0).toUpperCase() + t.slice(1)}
-                            {t !== 'accounts' && ` (${t === 'queue' ? tweets.length : t === 'drafts' ? drafts.length : history.length})`}
+                            {t === 'slots' ? 'Queue Slots' : t.charAt(0).toUpperCase() + t.slice(1)}
+                            {t !== 'accounts' && t !== 'slots' && ` (${t === 'queue' ? tweets.length : t === 'drafts' ? drafts.length : history.length})`}
                         </div>
                     ))}
                 </div>
@@ -482,6 +553,43 @@ const App: React.FC = () => {
                                 ))}
                             </div>
                         </div>
+                    ) : activeTab === 'slots' ? (
+                        <div style={{ padding: '1rem' }}>
+                            <h3>Manage Queue Slots</h3>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+                                <select
+                                    value={newSlotHour}
+                                    onChange={e => setNewSlotHour(e.target.value)}
+                                    style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '4px' }}
+                                >
+                                    {Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0')).map(h => (
+                                        <option key={h} value={h} style={{ background: 'var(--bg)', color: 'var(--text)' }}>{h}</option>
+                                    ))}
+                                </select>
+                                <span style={{ fontWeight: 'bold' }}>:</span>
+                                <select
+                                    value={newSlotMinute}
+                                    onChange={e => setNewSlotMinute(e.target.value)}
+                                    style={{ padding: '0.5rem', background: 'transparent', border: '1px solid var(--border)', color: 'var(--text)', borderRadius: '4px' }}
+                                >
+                                    {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0')).map(m => (
+                                        <option key={m} value={m} style={{ background: 'var(--bg)', color: 'var(--text)' }}>{m}</option>
+                                    ))}
+                                </select>
+                                <button onClick={handleAddSlot}>Add Daily Slot</button>
+                            </div>
+                            <div className="account-list">
+                                {queueSlots.map(slot => (
+                                    <div key={slot.id} className="queue-item" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                        <div>
+                                            <strong>{slot.time_str}</strong>
+                                            <div style={{ fontSize: '0.7rem', opacity: 0.5 }}>Last trigger: {slot.last_sent_at ? new Date(slot.last_sent_at).toLocaleString() : 'Never'}</div>
+                                        </div>
+                                        <button onClick={() => handleDeleteSlot(slot.id)} className="btn-danger" style={{ padding: '0.2rem 0.5rem' }}>Delete</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     ) : (activeTab === 'queue' ? tweets : activeTab === 'drafts' ? drafts : history).length === 0 ? (
                         <p style={{ color: 'var(--text-secondary)', textAlign: 'center', padding: '2rem' }}>
                             {activeTab === 'queue' ? 'No pending tweets.' : activeTab === 'drafts' ? 'No drafts saved.' : 'No history found.'}
@@ -494,6 +602,18 @@ const App: React.FC = () => {
                                         <span className={`status status-${tweet.status.toLowerCase()}`}>
                                             {tweet.status}
                                         </span>
+                                        {activeTab === 'queue' && (
+                                            <>
+                                                <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem', borderRadius: '4px', background: tweet.mode === 'scheduled' ? '#9b59b6' : '#3498db', color: '#fff', fontWeight: 'bold' }}>
+                                                    {tweet.mode.toUpperCase()}
+                                                </span>
+                                                {tweet.is_recurring && (
+                                                    <span style={{ fontSize: '0.7rem', padding: '0.2rem 0.4rem', borderRadius: '4px', background: '#27ae60', color: '#fff', fontWeight: 'bold' }}>
+                                                        RECURRING ({tweet.send_count})
+                                                    </span>
+                                                )}
+                                            </>
+                                        )}
                                         <select
                                             value={tweet.account_id}
                                             onChange={(e) => handleUpdateTweetAccount(tweet.id, Number(e.target.value))}
@@ -518,8 +638,8 @@ const App: React.FC = () => {
                                 )}
                                 <div className="tweet-meta">
                                     {activeTab === 'queue'
-                                        ? `Scheduled for: ${new Date(tweet.scheduled_at).toLocaleString()}`
-                                        : activeTab === 'drafts' ? 'Saved as draft' : `Sent at: ${new Date(tweet.scheduled_at).toLocaleString()}`}
+                                        ? `Wait time ends: ${new Date(tweet.scheduled_at).toLocaleString()}`
+                                        : activeTab === 'drafts' ? 'Saved as draft' : `Executed at: ${new Date(tweet.sent_at).toLocaleString()}`}
                                 </div>
                             </div>
                         ))

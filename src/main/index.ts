@@ -110,6 +110,19 @@ app.whenReady().then(() => {
         return db.deleteAccount(id)
     })
 
+    // IPC Handlers - Queue Slots
+    ipcMain.handle('get-queue-slots', () => {
+        return db.getQueueSlots()
+    })
+
+    ipcMain.handle('add-queue-slot', (_, timeStr) => {
+        return db.addQueueSlot(timeStr)
+    })
+
+    ipcMain.handle('delete-queue-slot', (_, id) => {
+        return db.deleteQueueSlot(id)
+    })
+
     // IPC Handlers - Tweets
     ipcMain.handle('get-pending-tweets', () => {
         return db.getPendingTweets(Date.now() + 1000 * 60 * 60 * 24 * 365) // Get all pending

@@ -474,7 +474,7 @@ const App: React.FC = () => {
                         Save Draft
                     </button>
                     <button onClick={() => handleAction(false)} disabled={loading}>
-                        {loading ? 'Scheduling...' : 'Schedule Thread'}
+                        {loading ? 'Publishing...' : 'Publish'}
                     </button>
                 </div>
 

@@ -171,6 +171,10 @@ app.whenReady().then(() => {
         return db.deleteTweet(id)
     })
 
+    ipcMain.handle('soft-delete-tweet', (_, id) => {
+        return db.softDeleteTweet(id)
+    })
+
     ipcMain.handle('handle-media-upload', async (_, filePath: string) => {
         const mediaDir = join(app.getPath('userData'), 'media')
         await fs.ensureDir(mediaDir)

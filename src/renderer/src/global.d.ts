@@ -10,6 +10,7 @@ declare global {
             getHistory: (limit: number) => Promise<any[]>;
             updateTweet: (id: number, tweet: any) => Promise<void>;
             deleteTweet: (id: number) => Promise<void>;
+            softDeleteTweet: (id: number) => Promise<void>;
             softDeleteHistory: (id: number) => Promise<void>;
             handleMediaUpload: (path: string) => Promise<string>;
             // Account Management

@@ -27,6 +27,7 @@ export interface TweetRecord {
     is_recurring: boolean
     send_count: number
     recurrence_interval: number
+    is_deleted?: number
 }
 
 export interface QueueSlot {
@@ -89,6 +90,7 @@ export class DatabaseService {
         is_recurring INTEGER DEFAULT 0,
         send_count INTEGER DEFAULT 0,
         recurrence_interval INTEGER DEFAULT 15552000000,
+        is_deleted INTEGER DEFAULT 0,
         FOREIGN KEY (account_id) REFERENCES accounts(id)
       )
     `)
@@ -120,6 +122,10 @@ export class DatabaseService {
         const hasRecurrenceInterval = tableInfo.some((col: any) => col.name === 'recurrence_interval')
         if (!hasRecurrenceInterval) {
             this.db.exec("ALTER TABLE tweets ADD COLUMN recurrence_interval INTEGER DEFAULT 15552000000")
+        }
+        const hasIsDeletedTweet = tableInfo.some((col: any) => col.name === 'is_deleted')
+        if (!hasIsDeletedTweet) {
+            this.db.exec("ALTER TABLE tweets ADD COLUMN is_deleted INTEGER DEFAULT 0")
         }
 
         // Create queue_slots table
@@ -223,8 +229,8 @@ export class DatabaseService {
     // Tweet Methods
     createTweet(tweet: TweetRecord): number {
         const stmt = this.db.prepare(`
-      INSERT INTO tweets (content, status, scheduled_at, media_path, thread_id, sequence_index, parent_id, account_id, mode, is_recurring, send_count, recurrence_interval)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO tweets (content, status, scheduled_at, media_path, thread_id, sequence_index, parent_id, account_id, mode, is_recurring, send_count, recurrence_interval, is_deleted)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
         const result = stmt.run(
             tweet.content,
@@ -238,7 +244,8 @@ export class DatabaseService {
             tweet.mode || 'scheduled',
             tweet.is_recurring ? 1 : 0,
             tweet.send_count || 0,
-            tweet.recurrence_interval || 15552000000
+            tweet.recurrence_interval || 15552000000,
+            tweet.is_deleted || 0
         )
         return result.lastInsertRowid as number
     }
@@ -254,12 +261,12 @@ export class DatabaseService {
     }
 
     getPendingTweets(now: number): TweetRecord[] {
-        const stmt = this.db.prepare("SELECT * FROM tweets WHERE status = 'pending' AND scheduled_at <= ? ORDER BY scheduled_at ASC")
+        const stmt = this.db.prepare("SELECT * FROM tweets WHERE status = 'pending' AND scheduled_at <= ? AND is_deleted = 0 ORDER BY scheduled_at ASC")
         return stmt.all(now) as TweetRecord[]
     }
 
     getDrafts(): TweetRecord[] {
-        const stmt = this.db.prepare("SELECT * FROM tweets WHERE status = 'draft' ORDER BY id DESC")
+        const stmt = this.db.prepare("SELECT * FROM tweets WHERE status = 'draft' AND is_deleted = 0 ORDER BY id DESC")
         return stmt.all() as TweetRecord[]
     }
 
@@ -268,6 +275,10 @@ export class DatabaseService {
         const values = Object.values(tweet)
         const stmt = this.db.prepare(`UPDATE tweets SET ${fields} WHERE id = ?`)
         stmt.run(...values, id)
+    }
+
+    softDeleteTweet(id: number) {
+        this.db.prepare('UPDATE tweets SET is_deleted = 1 WHERE id = ?').run(id)
     }
 
     getHistory(limit: number = 50): SendLog[] {

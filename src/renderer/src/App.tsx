@@ -210,7 +210,7 @@ const App: React.FC = () => {
         if (activeTab === 'history') {
             await window.api.softDeleteHistory(id)
         } else {
-            await window.api.deleteTweet(id)
+            await window.api.softDeleteTweet(id)
         }
         await fetchTweets()
     }

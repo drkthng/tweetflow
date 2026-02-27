@@ -13,7 +13,10 @@ const DatabaseView: React.FC = () => {
     useEffect(() => {
         window.api.dbGetTables().then(t => {
             setTables(t)
-            if (t.length > 0) setSelectedTable(t[0])
+            if (t.length > 0) {
+                const defaultTable = t.includes('tweets') ? 'tweets' : t[0]
+                setSelectedTable(defaultTable)
+            }
         })
     }, [])
 

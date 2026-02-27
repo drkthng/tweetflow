@@ -16,9 +16,18 @@ const processor = new Processor(db)
 let tray: Tray | null = null
 let mainWindow: BrowserWindow | null = null
 
+let isProcessing = false
 // Start background worker interval
-setInterval(() => {
-    processor.processQueue().catch(console.error)
+setInterval(async () => {
+    if (isProcessing) return
+    isProcessing = true
+    try {
+        await processor.processQueue()
+    } catch (err) {
+        console.error(err)
+    } finally {
+        isProcessing = false
+    }
 }, 5000) // Check every 5 seconds for precise thread timing
 
 function createTray(): void {

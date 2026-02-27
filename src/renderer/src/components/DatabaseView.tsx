@@ -22,13 +22,14 @@ const DatabaseView: React.FC = () => {
 
     const loadRows = useCallback(async () => {
         if (!selectedTable) return
+
+        // Fetch schema to get columns even for empty tables
+        const schema = await window.api.dbGetSchema(selectedTable)
+        setColumns(schema.map((col: any) => col.name))
+
         const data = await window.api.dbGetRows(selectedTable)
         setRows(data)
-        if (data.length > 0) {
-            setColumns(Object.keys(data[0]))
-        } else {
-            setColumns([])
-        }
+
         setShowAddRow(false)
         setEditingCell(null)
     }, [selectedTable])

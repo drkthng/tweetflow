@@ -27,6 +27,7 @@ declare global {
             dbInsertRow: (table: string, data: any) => Promise<number>;
             dbUpdateRow: (table: string, id: number, data: any) => Promise<void>;
             dbDeleteRow: (table: string, id: number) => Promise<void>;
+            dbGetSchema: (table: string) => Promise<any[]>;
         };
     }
 }

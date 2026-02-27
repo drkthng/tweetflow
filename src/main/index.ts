@@ -201,6 +201,10 @@ app.whenReady().then(() => {
         db.deleteRow(table, id)
     })
 
+    ipcMain.handle('db-get-schema', (_, table: string) => {
+        return db.getTableInfo(table)
+    })
+
     createWindow()
     createTray()
 

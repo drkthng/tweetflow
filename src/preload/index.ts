@@ -28,7 +28,8 @@ if (process.contextIsolated) {
             dbGetRows: (table: string) => ipcRenderer.invoke('db-get-rows', table),
             dbInsertRow: (table: string, data: any) => ipcRenderer.invoke('db-insert-row', table, data),
             dbUpdateRow: (table: string, id: number, data: any) => ipcRenderer.invoke('db-update-row', table, id, data),
-            dbDeleteRow: (table: string, id: number) => ipcRenderer.invoke('db-delete-row', table, id)
+            dbDeleteRow: (table: string, id: number) => ipcRenderer.invoke('db-delete-row', table, id),
+            dbGetSchema: (table: string) => ipcRenderer.invoke('db-get-schema', table)
         })
     } catch (error) {
         console.error(error)
@@ -61,6 +62,7 @@ if (process.contextIsolated) {
         dbGetRows: (table: string) => ipcRenderer.invoke('db-get-rows', table),
         dbInsertRow: (table: string, data: any) => ipcRenderer.invoke('db-insert-row', table, data),
         dbUpdateRow: (table: string, id: number, data: any) => ipcRenderer.invoke('db-update-row', table, id, data),
-        dbDeleteRow: (table: string, id: number) => ipcRenderer.invoke('db-delete-row', table, id)
+        dbDeleteRow: (table: string, id: number) => ipcRenderer.invoke('db-delete-row', table, id),
+        dbGetSchema: (table: string) => ipcRenderer.invoke('db-get-schema', table)
     }
 }

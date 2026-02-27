@@ -12,6 +12,7 @@ if (process.contextIsolated) {
             getHistory: (limit: number) => ipcRenderer.invoke('get-history', limit),
             updateTweet: (id: number, tweet: any) => ipcRenderer.invoke('update-tweet', id, tweet),
             deleteTweet: (id: number) => ipcRenderer.invoke('delete-tweet', id),
+            softDeleteHistory: (id: number) => ipcRenderer.invoke('soft-delete-history', id),
             handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path),
             // Account Management
             getAccounts: () => ipcRenderer.invoke('get-accounts'),
@@ -44,6 +45,7 @@ if (process.contextIsolated) {
         getHistory: (limit: number) => ipcRenderer.invoke('get-history', limit),
         updateTweet: (id: number, tweet: any) => ipcRenderer.invoke('update-tweet', id, tweet),
         deleteTweet: (id: number) => ipcRenderer.invoke('delete-tweet', id),
+        softDeleteHistory: (id: number) => ipcRenderer.invoke('soft-delete-history', id),
         handleMediaUpload: (path: string) => ipcRenderer.invoke('handle-media-upload', path),
         // Account Management
         getAccounts: () => ipcRenderer.invoke('get-accounts'),

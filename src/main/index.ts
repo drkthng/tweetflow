@@ -145,6 +145,10 @@ app.whenReady().then(() => {
         return db.getHistory(limit)
     })
 
+    ipcMain.handle('soft-delete-history', (_, id) => {
+        return db.softDeleteSendLog(id)
+    })
+
     ipcMain.handle('schedule-tweet', (_, tweetData) => {
         return db.createTweet({
             ...tweetData,

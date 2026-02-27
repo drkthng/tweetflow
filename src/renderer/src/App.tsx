@@ -208,7 +208,7 @@ const App: React.FC = () => {
     const handleDelete = async (id: number) => {
         if (!confirm('Are you sure you want to delete this item?')) return
         if (activeTab === 'history') {
-            await window.api.dbDeleteRow('send_logs', id)
+            await window.api.softDeleteHistory(id)
         } else {
             await window.api.deleteTweet(id)
         }

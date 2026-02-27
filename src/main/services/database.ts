@@ -44,6 +44,7 @@ export interface SendLog {
     status: string
     error_message?: string | null
     twitter_tweet_id?: string | null
+    is_deleted?: number
 }
 
 export class DatabaseService {
@@ -140,9 +141,17 @@ export class DatabaseService {
                 sent_at INTEGER NOT NULL,
                 status TEXT NOT NULL,
                 error_message TEXT,
-                twitter_tweet_id TEXT
+                twitter_tweet_id TEXT,
+                is_deleted INTEGER DEFAULT 0
             )
         `)
+
+        // Migrate send_logs if necessary
+        const tableInfoLogs = this.getTableInfo('send_logs') as any[]
+        const hasIsDeleted = tableInfoLogs.some((col: any) => col.name === 'is_deleted')
+        if (!hasIsDeleted) {
+            this.db.exec('ALTER TABLE send_logs ADD COLUMN is_deleted INTEGER DEFAULT 0')
+        }
 
         // Seed default slots
         const slotCount = this.db.prepare('SELECT COUNT(*) as count FROM queue_slots').get() as { count: number }
@@ -264,6 +273,7 @@ export class DatabaseService {
     getHistory(limit: number = 50): SendLog[] {
         return this.db.prepare(`
             SELECT * FROM send_logs
+            WHERE is_deleted = 0
             ORDER BY sent_at DESC
             LIMIT ?
         `).all(limit) as SendLog[]
@@ -291,8 +301,8 @@ export class DatabaseService {
     // Send Log Methods
     addSendLog(log: SendLog): number {
         const stmt = this.db.prepare(`
-            INSERT INTO send_logs (tweet_id, account_id, content, sent_at, status, error_message, twitter_tweet_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO send_logs (tweet_id, account_id, content, sent_at, status, error_message, twitter_tweet_id, is_deleted)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `)
         const result = stmt.run(
             log.tweet_id,
@@ -301,9 +311,14 @@ export class DatabaseService {
             log.sent_at,
             log.status,
             log.error_message || null,
-            log.twitter_tweet_id || null
+            log.twitter_tweet_id || null,
+            log.is_deleted || 0
         )
         return result.lastInsertRowid as number
+    }
+
+    softDeleteSendLog(id: number) {
+        this.db.prepare('UPDATE send_logs SET is_deleted = 1 WHERE id = ?').run(id)
     }
 
     deleteTweet(id: number) {

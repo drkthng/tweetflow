@@ -162,4 +162,32 @@ describe('DatabaseService', () => {
         const afterDelete = dbService.getAllRows('accounts')
         expect(afterDelete.find((r: any) => r.id === id)).toBeUndefined()
     })
+
+    it('should soft delete a send log and hide it from history', () => {
+        const accountId = dbService.createAccount({ name: 'Acc', app_key: 'k', app_secret: 's', access_token: 't', access_secret: 'as' })
+        const logId = dbService.addSendLog({
+            tweet_id: 1,
+            account_id: accountId,
+            content: 'Test Log',
+            sent_at: Date.now(),
+            status: 'sent'
+        })
+
+        // Verify it shows up in history
+        let history = dbService.getHistory()
+        expect(history.some(h => h.id === logId)).toBe(true)
+
+        // Soft delete
+        dbService.softDeleteSendLog(logId)
+
+        // Verify it is hidden from history
+        history = dbService.getHistory()
+        expect(history.some(h => h.id === logId)).toBe(false)
+
+        // Verify it still exists in the database with is_deleted = 1
+        const rows = dbService.getAllRows('send_logs')
+        const log = rows.find((r: any) => r.id === logId)
+        expect(log).toBeDefined()
+        expect(log.is_deleted).toBe(1)
+    })
 })

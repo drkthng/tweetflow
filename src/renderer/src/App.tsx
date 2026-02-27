@@ -98,6 +98,13 @@ const App: React.FC = () => {
         return () => clearInterval(interval)
     }, [])
 
+    // Refetch data when switching back to main tabs (in case of Database View edits)
+    useEffect(() => {
+        if (['queue', 'drafts', 'history'].includes(activeTab)) {
+            fetchTweets()
+        }
+    }, [activeTab])
+
     const handleAction = async (isDraft: boolean) => {
         if (selectedAccountId === '') {
             alert('Please select or add an account first.')

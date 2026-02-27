@@ -167,6 +167,27 @@ app.whenReady().then(() => {
         return destPath
     })
 
+    // IPC Handlers - Database View (testing)
+    ipcMain.handle('db-get-tables', () => {
+        return db.getTableNames()
+    })
+
+    ipcMain.handle('db-get-rows', (_, table: string) => {
+        return db.getAllRows(table)
+    })
+
+    ipcMain.handle('db-insert-row', (_, table: string, data: Record<string, any>) => {
+        return db.insertRow(table, data)
+    })
+
+    ipcMain.handle('db-update-row', (_, table: string, id: number, data: Record<string, any>) => {
+        db.updateRow(table, id, data)
+    })
+
+    ipcMain.handle('db-delete-row', (_, table: string, id: number) => {
+        db.deleteRow(table, id)
+    })
+
     createWindow()
     createTray()
 

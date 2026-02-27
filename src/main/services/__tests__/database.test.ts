@@ -125,4 +125,41 @@ describe('DatabaseService', () => {
         expect(pending).toHaveLength(1)
         expect(pending[0].content).toBe('Past')
     })
+
+    it('should return table names', () => {
+        const tables = dbService.getTableNames()
+        expect(tables).toContain('accounts')
+        expect(tables).toContain('tweets')
+        expect(tables).toContain('queue_slots')
+        expect(tables).toContain('send_logs')
+    })
+
+    it('should get all rows from a valid table', () => {
+        dbService.createAccount({
+            name: 'Test', app_key: 'k', app_secret: 's', access_token: 't', access_secret: 'as'
+        })
+        const rows = dbService.getAllRows('accounts')
+        expect(rows).toHaveLength(1)
+        expect(rows[0].name).toBe('Test')
+    })
+
+    it('should reject getAllRows for invalid table', () => {
+        expect(() => dbService.getAllRows('evil_table')).toThrow('not allowed')
+    })
+
+    it('should insert, update, and delete a row generically', () => {
+        const id = dbService.insertRow('accounts', {
+            name: 'Generic', app_key: 'gk', app_secret: 'gs', access_token: 'gt', access_secret: 'gas'
+        })
+        expect(id).toBeGreaterThan(0)
+
+        dbService.updateRow('accounts', id, { name: 'Updated' })
+        const rows = dbService.getAllRows('accounts')
+        const updated = rows.find((r: any) => r.id === id)
+        expect(updated.name).toBe('Updated')
+
+        dbService.deleteRow('accounts', id)
+        const afterDelete = dbService.getAllRows('accounts')
+        expect(afterDelete.find((r: any) => r.id === id)).toBeUndefined()
+    })
 })

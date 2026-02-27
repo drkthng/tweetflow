@@ -48,6 +48,7 @@ export interface SendLog {
 
 export class DatabaseService {
     private db: Database.Database
+    private allowedTables = ['accounts', 'tweets', 'queue_slots', 'send_logs']
 
     constructor(dbPath: string) {
         if (dbPath !== ':memory:') {
@@ -312,6 +313,46 @@ export class DatabaseService {
 
     getTableInfo(tableName: string) {
         return this.db.pragma(`table_info(${tableName})`)
+    }
+
+    getTableNames(): string[] {
+        return [...this.allowedTables]
+    }
+
+    getAllRows(table: string): any[] {
+        if (!this.allowedTables.includes(table)) {
+            throw new Error(`Table "${table}" is not allowed`)
+        }
+        return this.db.prepare(`SELECT * FROM ${table}`).all()
+    }
+
+    insertRow(table: string, data: Record<string, any>): number {
+        if (!this.allowedTables.includes(table)) {
+            throw new Error(`Table "${table}" is not allowed`)
+        }
+        const keys = Object.keys(data)
+        const placeholders = keys.map(() => '?').join(', ')
+        const stmt = this.db.prepare(
+            `INSERT INTO ${table} (${keys.join(', ')}) VALUES (${placeholders})`
+        )
+        const result = stmt.run(...Object.values(data))
+        return result.lastInsertRowid as number
+    }
+
+    updateRow(table: string, id: number, data: Record<string, any>): void {
+        if (!this.allowedTables.includes(table)) {
+            throw new Error(`Table "${table}" is not allowed`)
+        }
+        const fields = Object.keys(data).map(k => `${k} = ?`).join(', ')
+        const stmt = this.db.prepare(`UPDATE ${table} SET ${fields} WHERE id = ?`)
+        stmt.run(...Object.values(data), id)
+    }
+
+    deleteRow(table: string, id: number): void {
+        if (!this.allowedTables.includes(table)) {
+            throw new Error(`Table "${table}" is not allowed`)
+        }
+        this.db.prepare(`DELETE FROM ${table} WHERE id = ?`).run(id)
     }
 
     close() {

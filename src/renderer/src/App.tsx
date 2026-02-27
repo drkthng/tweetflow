@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import TweetBlock from './components/TweetBlock'
+import DatabaseView from './components/DatabaseView'
 
 interface Tweet {
     id: number
@@ -38,7 +39,7 @@ const App: React.FC = () => {
     const [threadDelay, setThreadDelay] = useState(20)
     const [history, setHistory] = useState<any[]>([]) // Using any[] for history because it now follows SendLog
     const [historyLimit] = useState(50)
-    const [activeTab, setActiveTab] = useState<'queue' | 'drafts' | 'history' | 'accounts' | 'slots'>('queue')
+    const [activeTab, setActiveTab] = useState<'queue' | 'drafts' | 'history' | 'accounts' | 'slots' | 'database'>('queue')
     const [customSeparator, setCustomSeparator] = useState('||')
 
     // New Composer States
@@ -509,20 +510,22 @@ const App: React.FC = () => {
 
             <div className="card">
                 <div className="tabs">
-                    {['queue', 'drafts', 'history', 'accounts', 'slots'].map((t) => (
+                    {['queue', 'drafts', 'history', 'accounts', 'slots', 'database'].map((t) => (
                         <div
                             key={t}
                             className={`tab ${activeTab === t ? 'active' : ''}`}
                             onClick={() => setActiveTab(t as any)}
                         >
-                            {t === 'slots' ? 'Queue Slots' : t.charAt(0).toUpperCase() + t.slice(1)}
-                            {t !== 'accounts' && t !== 'slots' && ` (${t === 'queue' ? tweets.length : t === 'drafts' ? drafts.length : history.length})`}
+                            {t === 'slots' ? 'Queue Slots' : t === 'database' ? '🗄️ Database' : t.charAt(0).toUpperCase() + t.slice(1)}
+                            {t !== 'accounts' && t !== 'slots' && t !== 'database' && ` (${t === 'queue' ? tweets.length : t === 'drafts' ? drafts.length : history.length})`}
                         </div>
                     ))}
                 </div>
 
                 <div className="tab-content">
-                    {activeTab === 'accounts' ? (
+                    {activeTab === 'database' ? (
+                        <DatabaseView />
+                    ) : activeTab === 'accounts' ? (
                         <div style={{ padding: '1rem' }}>
                             <h3>Manage Twitter Accounts</h3>
                             <div className="account-form" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '2rem' }}>

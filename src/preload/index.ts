@@ -21,7 +21,13 @@ if (process.contextIsolated) {
             // Queue Slot Management
             getQueueSlots: () => ipcRenderer.invoke('get-queue-slots'),
             addQueueSlot: (timeStr: string) => ipcRenderer.invoke('add-queue-slot', timeStr),
-            deleteQueueSlot: (id: number) => ipcRenderer.invoke('delete-queue-slot', id)
+            deleteQueueSlot: (id: number) => ipcRenderer.invoke('delete-queue-slot', id),
+            // Database View (testing)
+            dbGetTables: () => ipcRenderer.invoke('db-get-tables'),
+            dbGetRows: (table: string) => ipcRenderer.invoke('db-get-rows', table),
+            dbInsertRow: (table: string, data: any) => ipcRenderer.invoke('db-insert-row', table, data),
+            dbUpdateRow: (table: string, id: number, data: any) => ipcRenderer.invoke('db-update-row', table, id, data),
+            dbDeleteRow: (table: string, id: number) => ipcRenderer.invoke('db-delete-row', table, id)
         })
     } catch (error) {
         console.error(error)
@@ -47,6 +53,12 @@ if (process.contextIsolated) {
         // Queue Slot Management
         getQueueSlots: () => ipcRenderer.invoke('get-queue-slots'),
         addQueueSlot: (timeStr: string) => ipcRenderer.invoke('add-queue-slot', timeStr),
-        deleteQueueSlot: (id: number) => ipcRenderer.invoke('delete-queue-slot', id)
+        deleteQueueSlot: (id: number) => ipcRenderer.invoke('delete-queue-slot', id),
+        // Database View (testing)
+        dbGetTables: () => ipcRenderer.invoke('db-get-tables'),
+        dbGetRows: (table: string) => ipcRenderer.invoke('db-get-rows', table),
+        dbInsertRow: (table: string, data: any) => ipcRenderer.invoke('db-insert-row', table, data),
+        dbUpdateRow: (table: string, id: number, data: any) => ipcRenderer.invoke('db-update-row', table, id, data),
+        dbDeleteRow: (table: string, id: number) => ipcRenderer.invoke('db-delete-row', table, id)
     }
 }

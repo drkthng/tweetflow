@@ -274,3 +274,98 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
 }
+
+/* Database View */
+.db-view {
+  padding: 1rem;
+}
+
+.db-view-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+
+.db-view-select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 8px;
+  font-weight: 600;
+  min-width: 140px;
+}
+
+.db-view-count {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  margin-left: auto;
+}
+
+.db-view-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.db-view-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.db-view-table th {
+  background: rgba(255, 255, 255, 0.05);
+  text-align: left;
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-weight: 600;
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+}
+
+.db-view-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.db-view-table tr:hover {
+  background: rgba(29, 161, 242, 0.06);
+}
+
+.db-view-cell {
+  cursor: pointer;
+}
+
+.db-view-cell-id {
+  color: var(--text-secondary);
+  cursor: default;
+  font-family: monospace;
+}
+
+.db-view-null {
+  color: var(--text-secondary);
+  font-style: italic;
+  opacity: 0.5;
+}
+
+.db-view-input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--text);
+  padding: 0.2rem 0.3rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.db-view-add-row {
+  background: rgba(29, 161, 242, 0.08);
+}

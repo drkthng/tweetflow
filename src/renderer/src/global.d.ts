@@ -20,6 +20,12 @@ declare global {
             getQueueSlots: () => Promise<any[]>;
             addQueueSlot: (timeStr: string) => Promise<number>;
             deleteQueueSlot: (id: number) => Promise<void>;
+            // Database View (testing)
+            dbGetTables: () => Promise<string[]>;
+            dbGetRows: (table: string) => Promise<any[]>;
+            dbInsertRow: (table: string, data: any) => Promise<number>;
+            dbUpdateRow: (table: string, id: number, data: any) => Promise<void>;
+            dbDeleteRow: (table: string, id: number) => Promise<void>;
         };
     }
 }

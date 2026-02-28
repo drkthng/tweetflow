@@ -10,28 +10,28 @@ Welcome. You are working on **Retrocast** — a desktop application for statisti
 
 Do not skip any step. Each file builds on the previous one.
 
-| Step | File | Purpose |
-|------|------|---------|
-| 1 | This file (`new-agent-onboarding.md`) | Orientation |
-| 2 | `docs/PROGRESS.md` | What's done and what's next |
-| 3 | `docs/OBSTACLES.md` | Known problems and their solutions |
-| 4 | `.agent/context/ARCHITECTURE.md` | System design and data flow |
-| 5 | `.agent/context/CONVENTIONS.md` | Naming, formatting, API conventions |
-| 6 | `.agent/context/TESTING.md` | Testing strategy and requirements |
-| 7 | `.agent/rules/01-general.md` | General rules (all phases) |
-| 8 | `.agent/rules/0X-*.md` for your phase | Phase-specific rules |
-| 9 | `.agent/workflows/build-verify.md` | Run build verification NOW |
-| 10 | Your task prompt | Read carefully before starting |
+| Step | File                                  | Purpose                             |
+| ---- | ------------------------------------- | ----------------------------------- |
+| 1    | This file (`new-agent-onboarding.md`) | Orientation                         |
+| 2    | `docs/PROGRESS.md`                    | What's done and what's next         |
+| 3    | `docs/OBSTACLES.md`                   | Known problems and their solutions  |
+| 4    | `.agent/context/ARCHITECTURE.md`      | System design and data flow         |
+| 5    | `.agent/context/CONVENTIONS.md`       | Naming, formatting, API conventions |
+| 6    | `.agent/context/TESTING.md`           | Testing strategy and requirements   |
+| 7    | `.agent/rules/01-general.md`          | General rules (all phases)          |
+| 8    | `.agent/rules/0X-*.md` for your phase | Phase-specific rules                |
+| 9    | `.agent/workflows/build-verify.md`    | Run build verification NOW          |
+| 10   | Your task prompt                      | Read carefully before starting      |
 
 ## Phase Identification
 
 Determine which phase you are working on:
 
-| Phase | Directory | Rules File |
-|-------|-----------|------------|
-| Phase 1: Python Backend | `backend/` | `.agent/rules/02-python-backend.md` |
+| Phase                   | Directory   | Rules File                          |
+| ----------------------- | ----------- | ----------------------------------- |
+| Phase 1: Python Backend | `backend/`  | `.agent/rules/02-python-backend.md` |
 | Phase 2: React Frontend | `frontend/` | `.agent/rules/03-react-frontend.md` |
-| Phase 3: Electron Shell | `electron/` | `.agent/rules/04-electron.md` |
+| Phase 3: Electron Shell | `electron/` | `.agent/rules/04-electron.md`       |
 
 ## After Reading
 

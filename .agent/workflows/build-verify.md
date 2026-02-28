@@ -91,8 +91,8 @@ npm run dev
 
 When you need a fast sanity check after a small change:
 
-| Phase | Command | Expected |
-|-------|---------|----------|
-| Backend | `python -c "from app.main import app"` | No errors |
-| Frontend | `npx tsc --noEmit` | No errors |
-| Electron | `npx tsc -p tsconfig.electron.json` | No errors |
+| Phase    | Command                                | Expected  |
+| -------- | -------------------------------------- | --------- |
+| Backend  | `python -c "from app.main import app"` | No errors |
+| Frontend | `npx tsc --noEmit`                     | No errors |
+| Electron | `npx tsc -p tsconfig.electron.json`    | No errors |

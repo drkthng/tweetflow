@@ -1,9 +1,11 @@
 ---
 description: how to pin the app to start in windows
 ---
+
 To pin the TweetFlow Scheduler to your Windows Start menu, follow these steps:
 
 ### Option 1: Using the Development Version (Fastest)
+
 1. Right-click on your Desktop and select **New > Shortcut**.
 2. In the location field, type:
    `cmd.exe /c "cd /d C:\Users\Gordon\.gemini\antigravity\playground\midnight-omega && npm run dev"`
@@ -11,6 +13,7 @@ To pin the TweetFlow Scheduler to your Windows Start menu, follow these steps:
 4. Once created, **Right-click** the shortcut on your Desktop and select **Pin to Start**.
 
 ### Option 2: Building a Standalone App (Recommended for long-term use)
+
 1. Run the build command in the terminal:
    ```bash
    npm run build

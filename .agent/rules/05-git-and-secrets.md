@@ -10,13 +10,13 @@ These rules apply to ALL phases. Violations are critical security issues.
 
 The following must **never** be committed to the repository:
 
-| Item | Why |
-|------|-----|
-| `.env` files | Contains local config, paths, potential credentials |
-| `*.db`, `*.sqlite`, `*.sqlite3` | User data, potentially large |
-| `data/` directory | User-imported CSV files, cached data |
-| Files containing API keys | Security |
-| Files containing file paths with usernames | Privacy |
+| Item                                       | Why                                                 |
+| ------------------------------------------ | --------------------------------------------------- |
+| `.env` files                               | Contains local config, paths, potential credentials |
+| `*.db`, `*.sqlite`, `*.sqlite3`            | User data, potentially large                        |
+| `data/` directory                          | User-imported CSV files, cached data                |
+| Files containing API keys                  | Security                                            |
+| Files containing file paths with usernames | Privacy                                             |
 
 ## 2. .env Handling
 

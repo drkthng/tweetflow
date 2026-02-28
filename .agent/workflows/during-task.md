@@ -28,8 +28,10 @@ Follow these rules while implementing. Check back on this list every 3–5 files
    - **First**: Check `docs/OBSTACLES.md` — maybe it's already solved.
    - **If new problem**: Solve it, then document in `docs/OBSTACLES.md` **immediately**.
    - Use this format:
+
      ```markdown
      ### [SHORT_TITLE]
+
      - **Date**: YYYY-MM-DD
      - **Phase**: 1/2/3
      - **Problem**: What went wrong

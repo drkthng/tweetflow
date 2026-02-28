@@ -59,12 +59,12 @@ These rules apply to ALL phases (Backend, Frontend, Electron). Every agent MUST 
 
 After completing **any** task, update these files:
 
-| File | What to update |
-|------|---------------|
-| `docs/PROGRESS.md` | Mark completed items ✅, add new items discovered |
-| `docs/CHANGELOG.md` | Add entry with date, phase, type, and description |
+| File                | What to update                                          |
+| ------------------- | ------------------------------------------------------- |
+| `docs/PROGRESS.md`  | Mark completed items ✅, add new items discovered       |
+| `docs/CHANGELOG.md` | Add entry with date, phase, type, and description       |
 | `docs/OBSTACLES.md` | Add entry if any new problem was encountered and solved |
-| `docs/BACKLOG.md` | Add entry if any feature was intentionally deferred |
+| `docs/BACKLOG.md`   | Add entry if any feature was intentionally deferred     |
 
 ## 9. No Hardcoded Values
 

@@ -553,25 +553,30 @@ const App: React.FC = () => {
             </div>
           </div>
 
-          <div className="card" style={{ marginTop: "1rem" }}>
+          <div className="card">
             <div
               style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1.5rem",
+                display: "block",
               }}
             >
-              <div>
-                <label
-                  style={{
-                    fontSize: "0.9rem",
-                    color: "var(--text-secondary)",
-                    display: "block",
-                    marginBottom: "0.5rem",
-                  }}
-                >
-                  Send Mode
-                </label>
+              <label
+                style={{
+                  fontSize: "0.9rem",
+                  color: "var(--text-secondary)",
+                  display: "block",
+                  marginBottom: "0.8rem",
+                }}
+              >
+                Send Mode
+              </label>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: "2rem",
+                }}
+              >
                 <div style={{ display: "flex", gap: "1rem" }}>
                   <label
                     style={{
@@ -608,74 +613,84 @@ const App: React.FC = () => {
                     Queued
                   </label>
                 </div>
-              </div>
-              <div>
-                <label
+
+                <div
                   style={{
                     display: "flex",
                     alignItems: "center",
-                    gap: "0.4rem",
-                    cursor: "pointer",
-                    fontSize: "0.9rem",
+                    gap: "1rem",
                   }}
                 >
-                  <input
-                    type="checkbox"
-                    checked={isRecurring}
-                    onChange={(e) => setIsRecurring(e.target.checked)}
-                  />
-                  Recurring Send
-                </label>
-                {isRecurring && (
-                  <div
+                  <label
                     style={{
-                      marginTop: "0.5rem",
                       display: "flex",
                       alignItems: "center",
-                      gap: "0.5rem",
+                      gap: "0.4rem",
+                      cursor: "pointer",
+                      fontSize: "0.9rem",
                     }}
                   >
-                    <span style={{ fontSize: "0.8rem" }}>Every</span>
                     <input
-                      type="number"
-                      min="1"
-                      value={recurrenceMonths}
-                      onChange={(e) =>
-                        setRecurrenceMonths(parseInt(e.target.value) || 1)
-                      }
-                      style={{
-                        width: "50px",
-                        background: "transparent",
-                        border: "1px solid var(--border)",
-                        color: "var(--text)",
-                        padding: "0.2rem",
-                        borderRadius: "4px",
-                      }}
+                      type="checkbox"
+                      checked={isRecurring}
+                      onChange={(e) => setIsRecurring(e.target.checked)}
                     />
-                    <span style={{ fontSize: "0.8rem" }}>months</span>
-                  </div>
-                )}
+                    Recurring Send
+                  </label>
+                  {isRecurring && (
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                      }}
+                    >
+                      <span style={{ fontSize: "0.8rem" }}>Every</span>
+                      <input
+                        type="number"
+                        min="1"
+                        value={recurrenceMonths}
+                        onChange={(e) =>
+                          setRecurrenceMonths(parseInt(e.target.value) || 1)
+                        }
+                        style={{
+                          width: "50px",
+                          background: "transparent",
+                          border: "1px solid var(--border)",
+                          color: "var(--text)",
+                          padding: "0.2rem",
+                          borderRadius: "4px",
+                        }}
+                      />
+                      <span style={{ fontSize: "0.8rem" }}>months</span>
+                    </div>
+                  )}
+                </div>
               </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: "1rem",
+                marginTop: "1rem",
+                paddingTop: "1rem",
+                borderTop: "1px solid var(--border)",
+              }}
+            >
+              <button
+                onClick={() => handleAction(true)}
+                className="btn-secondary"
+                disabled={loading}
+              >
+                Save Draft
+              </button>
+              <button onClick={() => handleAction(false)} disabled={loading}>
+                {loading ? "Publishing..." : "Publish"}
+              </button>
             </div>
           </div>
 
-          <div
-            className="card"
-            style={{ marginTop: "1rem", display: "flex", gap: "1rem" }}
-          >
-            <button
-              onClick={() => handleAction(true)}
-              className="btn-secondary"
-              disabled={loading}
-            >
-              Save Draft
-            </button>
-            <button onClick={() => handleAction(false)} disabled={loading}>
-              {loading ? "Publishing..." : "Publish"}
-            </button>
-          </div>
-
-          <div className="card" style={{ marginTop: "1rem" }}>
+          <div className="card">
             <h3 style={{ margin: "0 0 1rem 0", fontSize: "1rem" }}>
               Smart Text Splitter
             </h3>

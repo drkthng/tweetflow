@@ -194,6 +194,16 @@ app.whenReady().then(() => {
     return destPath;
   });
 
+  ipcMain.handle("save-pasted-image", async (_, base64Data: string) => {
+    const mediaDir = join(app.getPath("userData"), "media");
+    await fs.ensureDir(mediaDir);
+    const fileName = `${Date.now()}-pasted.png`;
+    const destPath = join(mediaDir, fileName);
+    const buffer = Buffer.from(base64Data, "base64");
+    await fs.writeFile(destPath, buffer);
+    return destPath;
+  });
+
   // IPC Handlers - Settings
   ipcMain.handle("get-setting", (_, key: string) => {
     return db.getSetting(key);

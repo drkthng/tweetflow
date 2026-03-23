@@ -20,6 +20,8 @@ if (process.contextIsolated) {
         ipcRenderer.invoke("soft-delete-history", id),
       handleMediaUpload: (path: string) =>
         ipcRenderer.invoke("handle-media-upload", path),
+      savePastedImage: (base64Data: string) =>
+        ipcRenderer.invoke("save-pasted-image", base64Data),
       // Account Management
       getAccounts: () => ipcRenderer.invoke("get-accounts"),
       addAccount: (account: any) => ipcRenderer.invoke("add-account", account),
@@ -76,6 +78,8 @@ if (process.contextIsolated) {
       ipcRenderer.invoke("soft-delete-history", id),
     handleMediaUpload: (path: string) =>
       ipcRenderer.invoke("handle-media-upload", path),
+    savePastedImage: (base64Data: string) =>
+      ipcRenderer.invoke("save-pasted-image", base64Data),
     // Account Management
     getAccounts: () => ipcRenderer.invoke("get-accounts"),
     addAccount: (account: any) => ipcRenderer.invoke("add-account", account),

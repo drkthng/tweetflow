@@ -1,108 +1,108 @@
-# TweetFlow Scheduler 🚀
+# TweetFlow Scheduler
 
-TweetFlow Scheduler is a high-performance, desktop-native Twitter scheduling application built with Electron. It provides a seamless experience for power users to manage their presence on X (Twitter) with advanced threading, media support, and a smart text splitter.
+Desktop tweet scheduler for X (Twitter). Compose tweets and threads, schedule them, and post automatically via the API or manually via a copy-paste queue.
 
-![TweetFlow Screenshot](resources/screenshot.png) _(Note: Add your screenshot here)_
+Built with Electron + React + TypeScript + SQLite.
 
-## ✨ Key Features
+## Features
 
-- 📅 **Advanced Scheduling**: Plan your tweets and threads for any future date/time.
-- 🧵 **First-Class Threads**: Create long-form threads with automatic numbering (e.g., 1/5, 2/5) and custom delays between posts.
-- 🖼️ **Media Support**: Upload and schedule images directly from your desktop.
-- 🧠 **Smart Text Splitter**: Paste long-form content and let TweetFlow automatically split it into a perfectly formatted thread using semantic rules or custom separators.
-- 💾 **Drafts & History**: Save your ideas for later and keep a complete log of your scheduled and posted content.
-- ⚡ **Desktop Native**: Lightweight, fast, and runs in your system tray for non-intrusive background processing.
-- 🔒 **Privacy First**: Your data is stored locally in a SQLite database.
+- **Dual-mode posting** — Auto mode posts via the X API in the background. Manual mode shows a copy-paste queue so you can post by hand at zero cost.
+- **Thread support** — Compose multi-tweet threads with automatic numbering, configurable inter-tweet delay, and correct reply-chain posting.
+- **Scheduling & queue** — Schedule tweets for exact times, or add them to a daily queue with configurable time slots (e.g. 09:00, 14:00, 19:00).
+- **Smart text splitter** — Paste long text and split it into a thread automatically using sentence boundaries or a custom separator.
+- **Media attachments** — Attach images to tweets. In manual mode, copy images to clipboard for pasting into X's web UI.
+- **Multi-account** — Add multiple X accounts with API credentials. Select which account to post from per-tweet.
+- **Recurring tweets** — Mark tweets as recurring with a configurable interval (months). After posting, they re-enter the queue for the next cycle.
+- **Retry with backoff** — Transient API errors (429, 503, network timeouts) are retried with exponential backoff. Permanent errors fail immediately. Thread children are halted when a parent fails.
+- **Drafts & history** — Save drafts, view posting history with error details.
+- **System tray** — Runs in the background, auto-starts on boot, posts while the window is closed.
+- **Local-first** — All data stored locally in SQLite. No cloud dependency.
 
-## 🛠️ Tech Stack
-
-- **Frontend**: React, TypeScript, Vite
-- **Backend**: Electron, Node.js
-- **Database**: SQLite (better-sqlite3)
-- **API**: Twitter API v2 (twitter-api-v2)
-
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- [Node.js](https://nodejs.org/) (v18 or higher)
-- [npm](https://www.npmjs.com/)
-- A Twitter Developer account with API keys.
+- [Node.js](https://nodejs.org/) v18+
+- npm
 
-### Installation
-
-1.  **Clone the repository**:
-
-    ```bash
-    git clone https://github.com/your-username/TweetFlow-Scheduler.git
-    cd TweetFlow-Scheduler
-    ```
-
-2.  **Install dependencies**:
-
-    ```bash
-    npm install
-    ```
-
-3.  **Configure Environment Variables**:
-    Create a `.env` file in the root directory and add your Twitter API credentials:
-
-    ```env
-    TWITTER_APP_KEY=your_app_key
-    TWITTER_APP_SECRET=your_app_secret
-    TWITTER_ACCESS_TOKEN=your_access_token
-    TWITTER_ACCESS_SECRET=your_access_secret
-    ```
-
-4.  **Run Development Mode**:
-    ```bash
-    npm run dev
-    ```
-
-### Building for Production
-
-To create a production-ready package:
+### Install & Run
 
 ```bash
-npm run build
+git clone https://github.com/AntGravity-Research/TweetFlow-Scheduler.git
+cd TweetFlow-Scheduler
+npm install
+npm run dev
 ```
 
-## 👥 Multi-Account Support
+### Build for Production
 
-Currently, TweetFlow-Scheduler supports one active account at a time via environment variables.
+```bash
+npm run pack
+```
 
-### How to Switch Accounts
+This compiles the app and packages it to `dist/win-unpacked/tweetflow-scheduler.exe`.
 
-To use a different Twitter account:
+## Usage
 
-1.  **Update `.env`**: Open your `.env` file and replace the existing keys with the keys from your other account:
-    ```env
-    TWITTER_APP_KEY=new_app_key
-    TWITTER_APP_SECRET=new_app_secret
-    TWITTER_ACCESS_TOKEN=new_access_token
-    TWITTER_ACCESS_SECRET=new_access_secret
-    ```
-2.  **Restart App**: Close and restart TweetFlow-Scheduler to load the new credentials.
+### Manual Mode (default)
 
-> [!NOTE]
-> The internal database is already designed to support multiple accounts natively. Full multi-account management within the UI is planned for a future update.
+The app starts in **manual mode** — no API credentials needed.
 
-## 📜 Development Scripts
+1. Compose a tweet or thread in the left panel.
+2. Set a schedule time and click **Publish**.
+3. When the scheduled time arrives, switch to the **📋 Ready to Post** tab.
+4. For each tweet: **Copy Text** → paste into X → **Mark as Posted**.
+5. For images: **Copy Image** → paste into X's media upload.
 
-- `npm run dev`: Starts the application in development mode with HMR.
-- `npm run build`: Builds the application for production.
-- `npm run lint`: Runs ESLint for code quality checks.
-- `npm run format`: Formats code using Prettier.
-- `npm run test`: Executes unit tests via Vitest.
+Threads are grouped and numbered (1/3, 2/3, 3/3) so you can post them in order.
 
-## 🤝 Contributing
+### Auto Mode
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Toggle **Manual ↔ Auto** in the top-right corner. In auto mode, the background processor posts tweets via the X API when their scheduled time arrives.
 
-## 📄 License
+Requires API credentials: go to the **Accounts** tab and add your X app key, secret, access token, and access secret. The X API uses pay-per-use pricing ($0.01/tweet as of 2026).
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+### Queue Slots
+
+Instead of scheduling exact times, add tweets to the **queue** and configure daily time slots in the **Queue Slots** tab. The processor picks one queued tweet per slot.
+
+## Architecture
+
+```
+src/
+  main/                    # Electron main process
+    index.ts               # App lifecycle, IPC handlers, tray
+    logic/processor.ts     # Background tweet processor (retry, threading, backoff)
+    services/database.ts   # SQLite service (schema, migrations, queries)
+  preload/index.ts         # Context bridge (IPC API exposed to renderer)
+  renderer/src/            # React UI
+    App.tsx                # Main application component
+    components/            # TweetBlock, DatabaseView
+```
+
+**Key patterns:**
+- IPC bridge: renderer → preload (`contextBridge`) → main (`ipcMain.handle`)
+- Schema migrations via column-existence checks in `DatabaseService.init()`
+- Processor runs on a 5-second interval with a mutex flag
+- Settings stored as key-value pairs in SQLite `settings` table
+- Soft-delete on tweets and send logs (`is_deleted` flag)
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run dev` | Development mode with hot reload |
+| `npm run build` | Compile to `out/` (no packaging) |
+| `npm run pack` | Compile + package to `dist/win-unpacked/` |
+| `npm run start` | Preview the production build |
+| `npm run test` | Run unit tests (Vitest) |
+| `npm run lint` | ESLint |
+| `npm run format` | Prettier |
+
+## License
+
+MIT
 
 ---
 
-_Built with ❤️ by Antigravity_
+*Built by Antigravity*

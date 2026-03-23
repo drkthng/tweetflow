@@ -49,3 +49,9 @@ pnpm-lock.yaml
 # SQLite
 *.db
 *.db-journal
+.gsd/
+.bg-shell/
+# Throwaway debug scripts
+get_*.py
+test_*.mjs
+test_db.ts

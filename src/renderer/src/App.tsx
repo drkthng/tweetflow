@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import TweetBlock from "./components/TweetBlock";
 import DatabaseView from "./components/DatabaseView";
 
@@ -7,7 +7,9 @@ interface Tweet {
   content: string;
   status: string;
   scheduled_at: number;
+  media_path?: string | null;
   thread_id?: string | null;
+  sequence_index?: number;
   parent_id?: string | null;
   account_id: number;
   error_message?: string | null;
@@ -68,6 +70,13 @@ const App: React.FC = () => {
     access_secret: "",
   });
 
+  // Posting Mode (auto / manual)
+  const [postingMode, setPostingMode] = useState<"auto" | "manual">("manual");
+  const [readyTweets, setReadyTweets] = useState<Tweet[]>([]);
+  const [copiedId, setCopiedId] = useState<number | null>(null);
+  const [copiedImageId, setCopiedImageId] = useState<number | null>(null);
+  const [viewTab, setViewTab] = useState<"compose" | "ready">("compose");
+
   const fetchTweets = async () => {
     if (window.api && window.api.getPendingTweets) {
       const queueData = await window.api.getPendingTweets();
@@ -96,11 +105,73 @@ const App: React.FC = () => {
     }
   };
 
+  const fetchPostingMode = async () => {
+    if (window.api && window.api.getSetting) {
+      const mode = await window.api.getSetting("posting_mode");
+      if (mode === "auto" || mode === "manual") {
+        setPostingMode(mode);
+      }
+    }
+  };
+
+  const fetchReadyTweets = useCallback(async () => {
+    if (window.api && window.api.getReadyTweets) {
+      const data = await window.api.getReadyTweets();
+      setReadyTweets(data);
+    }
+  }, []);
+
+  const handleTogglePostingMode = async () => {
+    const newMode = postingMode === "auto" ? "manual" : "auto";
+    await window.api.setSetting("posting_mode", newMode);
+    setPostingMode(newMode);
+  };
+
+  const handleCopyText = async (tweet: Tweet) => {
+    try {
+      await navigator.clipboard.writeText(tweet.content);
+      setCopiedId(tweet.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // Fallback
+      const textarea = document.createElement("textarea");
+      textarea.value = tweet.content;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopiedId(tweet.id);
+      setTimeout(() => setCopiedId(null), 2000);
+    }
+  };
+
+  const handleCopyImage = async (tweet: Tweet) => {
+    if (!tweet.media_path) return;
+    const result = await window.api.copyImageToClipboard(tweet.media_path);
+    if (result.success) {
+      setCopiedImageId(tweet.id);
+      setTimeout(() => setCopiedImageId(null), 2000);
+    } else {
+      alert(`Could not copy image: ${result.error}`);
+    }
+  };
+
+  const handleMarkPosted = async (tweet: Tweet) => {
+    await window.api.markTweetPosted(tweet.id);
+    await fetchReadyTweets();
+    await fetchTweets(); // Also refresh queue counts
+  };
+
   useEffect(() => {
     fetchTweets();
     fetchAccounts();
     fetchSlots();
-    const interval = setInterval(fetchTweets, 10000);
+    fetchPostingMode();
+    fetchReadyTweets();
+    const interval = setInterval(() => {
+      fetchTweets();
+      fetchReadyTweets();
+    }, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -360,7 +431,97 @@ const App: React.FC = () => {
 
   return (
     <div className="container">
-      <h1>TweetFlow Scheduler</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+        <h1 style={{ margin: 0 }}>TweetFlow Scheduler</h1>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            background: "var(--bg-secondary)",
+            border: "1px solid var(--border)",
+            borderRadius: "9999px",
+            padding: "0.3rem 0.5rem",
+          }}
+        >
+          <span style={{
+            fontSize: "0.75rem",
+            color: postingMode === "manual" ? "var(--primary)" : "var(--text-secondary)",
+            fontWeight: postingMode === "manual" ? 700 : 400,
+          }}>
+            Manual
+          </span>
+          <div
+            onClick={handleTogglePostingMode}
+            style={{
+              width: "36px",
+              height: "20px",
+              borderRadius: "10px",
+              background: postingMode === "auto" ? "var(--primary)" : "var(--border)",
+              cursor: "pointer",
+              position: "relative",
+              transition: "background 0.2s",
+            }}
+          >
+            <div style={{
+              width: "16px",
+              height: "16px",
+              borderRadius: "50%",
+              background: "#fff",
+              position: "absolute",
+              top: "2px",
+              left: postingMode === "auto" ? "18px" : "2px",
+              transition: "left 0.2s",
+            }} />
+          </div>
+          <span style={{
+            fontSize: "0.75rem",
+            color: postingMode === "auto" ? "var(--primary)" : "var(--text-secondary)",
+            fontWeight: postingMode === "auto" ? 700 : 400,
+          }}>
+            Auto
+          </span>
+        </div>
+      </div>
+      {/* Top-level view tabs */}
+      {postingMode === "manual" && (
+        <div style={{ display: "flex", gap: "0", marginBottom: "1rem" }}>
+          <button
+            onClick={() => setViewTab("compose")}
+            style={{
+              flex: 1,
+              padding: "0.6rem 1rem",
+              borderRadius: "8px 0 0 8px",
+              border: "1px solid var(--border)",
+              background: viewTab === "compose" ? "var(--primary)" : "var(--bg-secondary)",
+              color: viewTab === "compose" ? "#fff" : "var(--text-secondary)",
+              fontWeight: viewTab === "compose" ? 700 : 400,
+              cursor: "pointer",
+              fontSize: "0.9rem",
+            }}
+          >
+            ✏️ Compose & Manage
+          </button>
+          <button
+            onClick={() => { setViewTab("ready"); fetchReadyTweets(); }}
+            style={{
+              flex: 1,
+              padding: "0.6rem 1rem",
+              borderRadius: "0 8px 8px 0",
+              border: "1px solid var(--border)",
+              borderLeft: "none",
+              background: viewTab === "ready" ? "var(--primary)" : "var(--bg-secondary)",
+              color: viewTab === "ready" ? "#fff" : "var(--text-secondary)",
+              fontWeight: viewTab === "ready" ? 700 : 400,
+              cursor: "pointer",
+              fontSize: "0.9rem",
+            }}
+          >
+            📋 Ready to Post {readyTweets.length > 0 ? `(${readyTweets.length})` : ""}
+          </button>
+        </div>
+      )}
+      {(postingMode === "auto" || viewTab === "compose") ? (
       <div className="main-layout">
         <div className="column-authoring">
           <div className="composer-layout">
@@ -758,10 +919,10 @@ const App: React.FC = () => {
                   onClick={() => setActiveTab(t as any)}
                 >
                   {t === "slots"
-                    ? "Queue Slots"
-                    : t === "database"
-                      ? "🗄️ Database"
-                      : t.charAt(0).toUpperCase() + t.slice(1)}
+                      ? "Queue Slots"
+                      : t === "database"
+                        ? "🗄️ Database"
+                        : t.charAt(0).toUpperCase() + t.slice(1)}
                   {t !== "accounts" &&
                     t !== "slots" &&
                     t !== "database" &&
@@ -1150,6 +1311,193 @@ const App: React.FC = () => {
           </div>
         </div>
       </div>
+      ) : (
+      /* ── Ready to Post View (full width) ── */
+      <div className="card" style={{ minHeight: "60vh" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+          <h2 style={{ margin: 0, fontSize: "1.1rem" }}>📋 Ready to Post</h2>
+          <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)" }}>
+            {readyTweets.length} tweet{readyTweets.length !== 1 ? "s" : ""} due
+          </span>
+        </div>
+        {readyTweets.length === 0 ? (
+          <p style={{ color: "var(--text-secondary)", textAlign: "center", padding: "3rem 1rem" }}>
+            No tweets ready to post. Tweets appear here when their scheduled time arrives.
+          </p>
+        ) : (
+          (() => {
+            // Group tweets: standalone tweets and thread groups
+            const threadGroups = new Map<string, Tweet[]>();
+            const standalone: Tweet[] = [];
+            for (const tweet of readyTweets) {
+              if (tweet.thread_id) {
+                const group = threadGroups.get(tweet.thread_id) || [];
+                group.push(tweet);
+                threadGroups.set(tweet.thread_id, group);
+              } else {
+                standalone.push(tweet);
+              }
+            }
+
+            const allItems: Array<{ type: "single"; tweet: Tweet } | { type: "thread"; threadId: string; tweets: Tweet[] }> = [];
+
+            for (const tweet of standalone) {
+              allItems.push({ type: "single", tweet });
+            }
+            for (const [threadId, tweets] of threadGroups) {
+              const sorted = tweets.sort((a, b) => (a.sequence_index || 0) - (b.sequence_index || 0));
+              allItems.push({ type: "thread", threadId, tweets: sorted });
+            }
+
+            // Sort by earliest scheduled_at (oldest first)
+            allItems.sort((a, b) => {
+              const aTime = a.type === "single" ? a.tweet.scheduled_at : a.tweets[0].scheduled_at;
+              const bTime = b.type === "single" ? b.tweet.scheduled_at : b.tweets[0].scheduled_at;
+              return aTime - bTime;
+            });
+
+            return allItems.map((item) => {
+              if (item.type === "single") {
+                const tweet = item.tweet;
+                const accountName = accounts.find(a => a.id === tweet.account_id)?.name || "Unknown";
+                return (
+                  <div key={tweet.id} className="queue-item" style={{ padding: "1rem" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.5rem" }}>
+                      <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", flexWrap: "wrap" }}>
+                        <span style={{ fontSize: "0.7rem", padding: "0.2rem 0.4rem", borderRadius: "4px", background: "#f5a623", color: "#000", fontWeight: "bold" }}>
+                          DUE
+                        </span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                          @{accountName}
+                        </span>
+                        <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>
+                          {new Date(tweet.scheduled_at).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="tweet-content" style={{ marginBottom: "0.75rem", whiteSpace: "pre-wrap" }}>
+                      {tweet.content}
+                    </div>
+                    {tweet.media_path && (
+                      <div style={{ marginBottom: "0.75rem" }}>
+                        <img
+                          src={`file://${tweet.media_path}`}
+                          alt="attachment"
+                          style={{ maxWidth: "200px", maxHeight: "150px", borderRadius: "8px", border: "1px solid var(--border)" }}
+                        />
+                      </div>
+                    )}
+                    <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                      <button
+                        onClick={() => handleCopyText(tweet)}
+                        className="btn-secondary"
+                        style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}
+                      >
+                        {copiedId === tweet.id ? "✓ Copied!" : "📋 Copy Text"}
+                      </button>
+                      {tweet.media_path && (
+                        <button
+                          onClick={() => handleCopyImage(tweet)}
+                          className="btn-secondary"
+                          style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}
+                        >
+                          {copiedImageId === tweet.id ? "✓ Copied!" : "🖼️ Copy Image"}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleMarkPosted(tweet)}
+                        style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem", background: "#2ecc71" }}
+                      >
+                        ✓ Mark as Posted
+                      </button>
+                    </div>
+                  </div>
+                );
+              } else {
+                // Thread group
+                const threadTweets = item.tweets;
+                const accountName = accounts.find(a => a.id === threadTweets[0].account_id)?.name || "Unknown";
+                return (
+                  <div key={item.threadId} style={{
+                    border: "1px solid var(--primary)",
+                    borderRadius: "8px",
+                    margin: "0.5rem 0",
+                    overflow: "hidden",
+                  }}>
+                    <div style={{
+                      background: "rgba(29, 161, 242, 0.1)",
+                      padding: "0.5rem 1rem",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--primary)" }}>
+                        🧵 Thread ({threadTweets.length} tweets)
+                      </span>
+                      <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)" }}>
+                        @{accountName} · {new Date(threadTweets[0].scheduled_at).toLocaleString()}
+                      </span>
+                    </div>
+                    {threadTweets.map((tweet, idx) => (
+                      <div key={tweet.id} className="queue-item" style={{ padding: "0.75rem 1rem", borderBottom: idx < threadTweets.length - 1 ? "1px solid var(--border)" : "none" }}>
+                        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginBottom: "0.4rem" }}>
+                          <span style={{
+                            fontSize: "0.7rem",
+                            padding: "0.15rem 0.4rem",
+                            borderRadius: "4px",
+                            background: "var(--primary)",
+                            color: "#fff",
+                            fontWeight: "bold",
+                          }}>
+                            {idx + 1}/{threadTweets.length}
+                          </span>
+                        </div>
+                        <div className="tweet-content" style={{ marginBottom: "0.5rem", whiteSpace: "pre-wrap" }}>
+                          {tweet.content}
+                        </div>
+                        {tweet.media_path && (
+                          <div style={{ marginBottom: "0.5rem" }}>
+                            <img
+                              src={`file://${tweet.media_path}`}
+                              alt="attachment"
+                              style={{ maxWidth: "160px", maxHeight: "120px", borderRadius: "8px", border: "1px solid var(--border)" }}
+                            />
+                          </div>
+                        )}
+                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                          <button
+                            onClick={() => handleCopyText(tweet)}
+                            className="btn-secondary"
+                            style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }}
+                          >
+                            {copiedId === tweet.id ? "✓ Copied!" : "📋 Copy Text"}
+                          </button>
+                          {tweet.media_path && (
+                            <button
+                              onClick={() => handleCopyImage(tweet)}
+                              className="btn-secondary"
+                              style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem" }}
+                            >
+                              {copiedImageId === tweet.id ? "✓ Copied!" : "🖼️ Copy Image"}
+                            </button>
+                          )}
+                          <button
+                            onClick={() => handleMarkPosted(tweet)}
+                            style={{ padding: "0.3rem 0.6rem", fontSize: "0.75rem", background: "#2ecc71" }}
+                          >
+                            ✓ Posted
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+            });
+          })()
+        )}
+      </div>
+      )}
     </div>
   );
 };

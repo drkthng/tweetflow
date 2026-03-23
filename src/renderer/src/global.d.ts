@@ -22,6 +22,13 @@ declare global {
       getQueueSlots: () => Promise<any[]>;
       addQueueSlot: (timeStr: string) => Promise<number>;
       deleteQueueSlot: (id: number) => Promise<void>;
+      // Settings
+      getSetting: (key: string) => Promise<string | null>;
+      setSetting: (key: string, value: string) => Promise<void>;
+      // Ready to Post (manual mode)
+      getReadyTweets: () => Promise<any[]>;
+      markTweetPosted: (id: number) => Promise<void>;
+      copyImageToClipboard: (imagePath: string) => Promise<{ success: boolean; error?: string }>;
       // Database View (testing)
       dbGetTables: () => Promise<string[]>;
       dbGetRows: (table: string) => Promise<any[]>;

@@ -13,6 +13,7 @@ declare global {
       softDeleteTweet: (id: number) => Promise<void>;
       softDeleteHistory: (id: number) => Promise<void>;
       handleMediaUpload: (path: string) => Promise<string>;
+      savePastedImage: (base64Data: string) => Promise<string>;
       // Account Management
       getAccounts: () => Promise<any[]>;
       addAccount: (account: any) => Promise<number>;

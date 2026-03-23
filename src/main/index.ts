@@ -6,6 +6,7 @@ import {
   Tray,
   Menu,
   nativeImage,
+  clipboard,
 } from "electron";
 import { join, basename } from "path";
 import { optimizer, is } from "@electron-toolkit/utils";
@@ -191,6 +192,45 @@ app.whenReady().then(() => {
     const destPath = join(mediaDir, fileName);
     await fs.copy(filePath, destPath);
     return destPath;
+  });
+
+  // IPC Handlers - Settings
+  ipcMain.handle("get-setting", (_, key: string) => {
+    return db.getSetting(key);
+  });
+
+  ipcMain.handle("set-setting", (_, key: string, value: string) => {
+    db.setSetting(key, value);
+  });
+
+  // IPC Handlers - Ready to Post (manual mode)
+  ipcMain.handle("get-ready-tweets", () => {
+    return db.getReadyTweets(Date.now());
+  });
+
+  ipcMain.handle("mark-tweet-posted", (_, id: number) => {
+    db.updateTweetStatus(id, "sent");
+    db.addSendLog({
+      tweet_id: id,
+      account_id: 0, // manual post — no account used
+      content: db.getTweetById(id)?.content || "",
+      sent_at: Date.now(),
+      status: "sent",
+      error_message: null,
+    });
+  });
+
+  ipcMain.handle("copy-image-to-clipboard", async (_, imagePath: string) => {
+    try {
+      const image = nativeImage.createFromPath(imagePath);
+      if (image.isEmpty()) {
+        return { success: false, error: "Could not load image" };
+      }
+      clipboard.writeImage(image);
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
   });
 
   // IPC Handlers - Database View (testing)

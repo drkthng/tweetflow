@@ -27,6 +27,8 @@ export interface TweetRecord {
   is_recurring: boolean;
   send_count: number;
   recurrence_interval: number;
+  retry_count: number;
+  next_retry_at?: number | null;
   is_deleted?: number;
 }
 
@@ -50,7 +52,7 @@ export interface SendLog {
 
 export class DatabaseService {
   private db: Database.Database;
-  private allowedTables = ["accounts", "tweets", "queue_slots", "send_logs"];
+  private allowedTables = ["accounts", "tweets", "queue_slots", "send_logs", "settings"];
 
   constructor(dbPath: string) {
     if (dbPath !== ":memory:") {
@@ -149,6 +151,22 @@ export class DatabaseService {
         "ALTER TABLE tweets ADD COLUMN is_deleted INTEGER DEFAULT 0",
       );
     }
+    const hasRetryCount = tableInfo.some(
+      (col: any) => col.name === "retry_count",
+    );
+    if (!hasRetryCount) {
+      this.db.exec(
+        "ALTER TABLE tweets ADD COLUMN retry_count INTEGER DEFAULT 0",
+      );
+    }
+    const hasNextRetryAt = tableInfo.some(
+      (col: any) => col.name === "next_retry_at",
+    );
+    if (!hasNextRetryAt) {
+      this.db.exec(
+        "ALTER TABLE tweets ADD COLUMN next_retry_at INTEGER",
+      );
+    }
 
     // Create queue_slots table
     this.db.exec(`
@@ -183,6 +201,24 @@ export class DatabaseService {
       this.db.exec(
         "ALTER TABLE send_logs ADD COLUMN is_deleted INTEGER DEFAULT 0",
       );
+    }
+
+    // Create settings table (key-value store)
+    this.db.exec(`
+      CREATE TABLE IF NOT EXISTS settings (
+        key TEXT PRIMARY KEY,
+        value TEXT NOT NULL
+      )
+    `);
+
+    // Default posting_mode to 'manual' (works for everyone out of the box)
+    const existingMode = this.db
+      .prepare("SELECT value FROM settings WHERE key = 'posting_mode'")
+      .get();
+    if (!existingMode) {
+      this.db
+        .prepare("INSERT INTO settings (key, value) VALUES ('posting_mode', 'manual')")
+        .run();
     }
 
     // Seed default slots
@@ -307,9 +343,31 @@ export class DatabaseService {
 
   getPendingTweets(now: number): TweetRecord[] {
     const stmt = this.db.prepare(
-      "SELECT * FROM tweets WHERE status = 'pending' AND scheduled_at <= ? AND is_deleted = 0 ORDER BY scheduled_at ASC",
+      "SELECT * FROM tweets WHERE status = 'pending' AND scheduled_at <= ? AND is_deleted = 0 AND (next_retry_at IS NULL OR next_retry_at <= ?) ORDER BY scheduled_at ASC",
     );
-    return stmt.all(now) as TweetRecord[];
+    return stmt.all(now, now) as TweetRecord[];
+  }
+
+  /**
+   * Fail all pending children in a thread after a parent tweet fails permanently.
+   * Marks them as 'failed' so they don't post as standalone tweets.
+   */
+  failThreadChildren(threadId: string, failedSequenceIndex: number, errorMessage: string): number {
+    const stmt = this.db.prepare(
+      "UPDATE tweets SET status = 'failed', error_message = ? WHERE thread_id = ? AND sequence_index > ? AND status = 'pending' AND is_deleted = 0",
+    );
+    const result = stmt.run(errorMessage, threadId, failedSequenceIndex);
+    return result.changes;
+  }
+
+  /**
+   * Update retry state for a tweet awaiting retry.
+   */
+  setTweetRetryState(id: number, retryCount: number, nextRetryAt: number, errorMessage: string) {
+    const stmt = this.db.prepare(
+      "UPDATE tweets SET retry_count = ?, next_retry_at = ?, error_message = ? WHERE id = ?",
+    );
+    stmt.run(retryCount, nextRetryAt, errorMessage, id);
   }
 
   getDrafts(): TweetRecord[] {
@@ -442,6 +500,34 @@ export class DatabaseService {
       throw new Error(`Table "${table}" is not allowed`);
     }
     this.db.prepare(`DELETE FROM ${table} WHERE id = ?`).run(id);
+  }
+
+  // Settings Methods
+  getSetting(key: string): string | null {
+    const row = this.db
+      .prepare("SELECT value FROM settings WHERE key = ?")
+      .get(key) as { value: string } | undefined;
+    return row ? row.value : null;
+  }
+
+  setSetting(key: string, value: string): void {
+    this.db
+      .prepare(
+        "INSERT INTO settings (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+      )
+      .run(key, value);
+  }
+
+  /**
+   * Get tweets that are due for posting (scheduled_at <= now).
+   * Used by the "Ready to Post" manual queue view.
+   * Ordered by scheduled_at ASC (oldest first), then sequence_index ASC (thread order).
+   */
+  getReadyTweets(now: number): TweetRecord[] {
+    const stmt = this.db.prepare(
+      "SELECT * FROM tweets WHERE status = 'pending' AND scheduled_at <= ? AND is_deleted = 0 ORDER BY scheduled_at ASC, sequence_index ASC",
+    );
+    return stmt.all(now) as TweetRecord[];
   }
 
   close() {

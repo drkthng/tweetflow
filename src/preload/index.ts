@@ -32,6 +32,16 @@ if (process.contextIsolated) {
         ipcRenderer.invoke("add-queue-slot", timeStr),
       deleteQueueSlot: (id: number) =>
         ipcRenderer.invoke("delete-queue-slot", id),
+      // Settings
+      getSetting: (key: string) => ipcRenderer.invoke("get-setting", key),
+      setSetting: (key: string, value: string) =>
+        ipcRenderer.invoke("set-setting", key, value),
+      // Ready to Post (manual mode)
+      getReadyTweets: () => ipcRenderer.invoke("get-ready-tweets"),
+      markTweetPosted: (id: number) =>
+        ipcRenderer.invoke("mark-tweet-posted", id),
+      copyImageToClipboard: (imagePath: string) =>
+        ipcRenderer.invoke("copy-image-to-clipboard", imagePath),
       // Database View (testing)
       dbGetTables: () => ipcRenderer.invoke("db-get-tables"),
       dbGetRows: (table: string) => ipcRenderer.invoke("db-get-rows", table),
@@ -78,6 +88,16 @@ if (process.contextIsolated) {
       ipcRenderer.invoke("add-queue-slot", timeStr),
     deleteQueueSlot: (id: number) =>
       ipcRenderer.invoke("delete-queue-slot", id),
+    // Settings
+    getSetting: (key: string) => ipcRenderer.invoke("get-setting", key),
+    setSetting: (key: string, value: string) =>
+      ipcRenderer.invoke("set-setting", key, value),
+    // Ready to Post (manual mode)
+    getReadyTweets: () => ipcRenderer.invoke("get-ready-tweets"),
+    markTweetPosted: (id: number) =>
+      ipcRenderer.invoke("mark-tweet-posted", id),
+    copyImageToClipboard: (imagePath: string) =>
+      ipcRenderer.invoke("copy-image-to-clipboard", imagePath),
     // Database View (testing)
     dbGetTables: () => ipcRenderer.invoke("db-get-tables"),
     dbGetRows: (table: string) => ipcRenderer.invoke("db-get-rows", table),
